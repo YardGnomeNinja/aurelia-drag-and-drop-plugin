@@ -1,0 +1,19 @@
+<template>
+    <require from="./drag-and-drop-item"></require>
+
+    <div    class="drag-and-drop-container"
+            id="${id}"
+            data-group-name="${groupName}"
+            dragover.trigger="dragover_handler($event)"
+            drop.trigger="drop_handler($event)">
+        <!-- <div    class="drag-and-drop-dropzone-placeholder"
+                show.bind="newInvoices[$index].lineItems.length == 0">
+            Drag and Drop Line Items Here...
+        </div> -->
+            <!-- <drag-and-drop-item
+                repeat.for="item of items"
+                id="${item.id}"
+                object-id="${item.objectId}"
+                text.bind="item.text"></drag-and-drop-item> -->
+    </div>
+</template>

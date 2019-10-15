@@ -1,12 +1,80 @@
 <template>
-  <h1>Hello, this is the dev app for plugin aurelia-drag-and-drop-plugin</h1>
+    <require from="elements/drag-and-drop.css"></require>
+
+    <h1>Hello, this is the dev app for plugin aurelia-drag-and-drop-plugin</h1>
   <p>This dev app is bundled to scripts/ folder (ignored in .gitignore). If you commit the bundle files to github, this app can serve as a <a href="https://pages.github.com" target="_blank">github page</a>!</p>
 
   <p>Please read the <a href="README.md">README</a> file in your project for more information.</p>
 
   <hr>
-  <h2>Custom element "hello-world"</h2>
-  <p>Usage:&nbsp;<code>&lt;hello-world message.bind="message"&gt;&lt;/hello-world&gt;</code></p>
-  <hello-world message.bind="message"></hello-world>
-
+  <h2>Custom element "drag-and-drop-container"</h2>
+  <p>Usage:&nbsp;<code>&lt;drag-and-drop-container message.bind="message"&gt;&lt;/drag-and-drop-container&gt;</code></p>
+  <!-- <drag-and-drop-container id="container0" data-group="group0" items.bind="items"></drag-and-drop-container> -->
+  <button click.delegate="click_test()">Test</button>
+    <div style="border: 5px solid #000;">
+        <ul
+            style="padding: 10px;"
+            class="container js-drag-and-drop-container"
+            id="container0"
+            data-container-group="containerGroup0"
+            data-accepts-from-container="container0"
+            data-drag="drag_handler0"
+            data-dragend="dragend_handler0"
+            data-drop="drop_handler0"
+            data-cancel="cancel_handler0"
+            data-remove="remove_handler0"
+            data-shadow="shadow_handler0"
+            data-over="over_handler0"
+            data-out="out_handler0"
+            data-cloned="cloned_handler0">
+                <li repeat.for="container0Item of container0Items" data-model.bind="container0Item" style="border: 1px solid #f00;">
+                    ${container0Item.id} - ${container0Item.propertyA} - ${container0Item.propertyB}
+                </li>
+        </ul>    
+    </div>
+    <div style="border: 10px solid #000;">
+        <ul
+            style="padding: 10px;"
+            class="container js-drag-and-drop-container"
+            id="container1"
+            data-container-group="containerGroup0"
+            data-accepts-from-container="container0,container1"
+            data-drag="drag_handler0"
+            data-dragend="dragend_handler0"
+            data-drop="drop_handler0"
+            data-cancel="cancel_handler0"
+            data-remove="remove_handler0"
+            data-shadow="shadow_handler0"
+            data-over="over_handler0"
+            data-out="out_handler0"
+            data-cloned="cloned_handler0">
+                <li repeat.for="container1Item of container1Items" data-model.bind="container1Item" style="border: 1px solid #0f0;">
+                    ${container1Item.id} - ${container1Item.propertyA} - ${container1Item.propertyB}
+                </li>
+        </ul>
+    </div>
+    <div style="border: 15px solid #000;">
+        <ul
+            style="padding: 10px;"
+            class="js-drag-and-drop-container"
+            id="container2"
+            data-container-group="containerGroup0"
+            data-accepts-from-container="container0,container1,container2">
+            <li repeat.for="container2Item of container2Items" data-model.bind="container2Item" style="border: 1px solid #00f;">
+                ${container2Item.id} - ${container2Item.propertyA} - ${container2Item.propertyB}
+            </li>
+        </ul>
+    </div>
+    <div style="border: 20px solid #000;">
+        <ul
+            style="padding: 10px;"
+            class="js-drag-and-drop-container"
+            id="container3"
+            data-container-group="alphaOmega"
+            data-dragend="dragend_handler0">
+                <li repeat.for="container3Item of container3Items" data-model.bind="container3Item" style="border: 1px solid #f0f;">
+                    ${container3Item}
+                </li>
+        </ul>
+    </div>
 </template>

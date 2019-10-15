@@ -105,5 +105,9 @@
       "text",
       "html"
     ]
+  },
+  "dependencies": {
+    "@types/dragula": "^2.1.34",
+    "dragula": "^3.7.2"
   }
 }

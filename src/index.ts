@@ -3,6 +3,6 @@ import {PLATFORM} from 'aurelia-pal';
 
 export function configure(config: FrameworkConfiguration) {
   config.globalResources([
-    PLATFORM.moduleName('./elements/hello-world')
+    PLATFORM.moduleName('./elements/data-model-custom-attribute')
   ]);
 }

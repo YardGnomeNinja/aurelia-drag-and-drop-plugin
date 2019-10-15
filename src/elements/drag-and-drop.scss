@@ -1,0 +1,19 @@
+@import '../../node_modules/dragula/dist/dragula.css';
+
+/* ------------------------------------ */
+/* CONTAINER -------------------------- */
+/* ------------------------------------ */
+
+.drag-and-drop-container {
+  background-color: lightgreen;
+}
+
+/* ------------------------------------ */
+/* ITEM ------------------------------- */
+/* ------------------------------------ */
+
+.drag-and-drop-item {
+    background-color: purple;
+    touch-action: none;
+    user-select: none;
+  }  
