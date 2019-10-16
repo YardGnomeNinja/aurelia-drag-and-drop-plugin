@@ -27,7 +27,7 @@
             data-over="over_handler0"
             data-out="out_handler0"
             data-cloned="cloned_handler0">
-                <li repeat.for="container0Item of container0Items" data-model.bind="container0Item" style="border: 1px solid #f00;">
+                <li repeat.for="container0Item of dragAndDropController.containerGroups.containerGroup0.containers.container0.items" data-model.bind="container0Item" style="border: 1px solid #f00;">
                     ${container0Item.id} - ${container0Item.propertyA} - ${container0Item.propertyB}
                 </li>
         </ul>    
@@ -48,7 +48,7 @@
             data-over="over_handler0"
             data-out="out_handler0"
             data-cloned="cloned_handler0">
-                <li repeat.for="container1Item of container1Items" data-model.bind="container1Item" style="border: 1px solid #0f0;">
+                <li repeat.for="container1Item of dragAndDropController.containerGroups.containerGroup0.containers.container1.items" data-model.bind="container1Item" style="border: 1px solid #0f0;">
                     ${container1Item.id} - ${container1Item.propertyA} - ${container1Item.propertyB}
                 </li>
         </ul>
@@ -60,7 +60,7 @@
             id="container2"
             data-container-group="containerGroup0"
             data-accepts-from-container="container0,container1,container2">
-            <li repeat.for="container2Item of container2Items" data-model.bind="container2Item" style="border: 1px solid #00f;">
+            <li repeat.for="container2Item of dragAndDropController.containerGroups.containerGroup0.containers.container2.items" data-model.bind="container2Item" style="border: 1px solid #00f;">
                 ${container2Item.id} - ${container2Item.propertyA} - ${container2Item.propertyB}
             </li>
         </ul>
@@ -72,7 +72,7 @@
             id="container3"
             data-container-group="alphaOmega"
             data-dragend="dragend_handler0">
-                <li repeat.for="container3Item of container3Items" data-model.bind="container3Item" style="border: 1px solid #f0f;">
+                <li repeat.for="container3Item of dragAndDropController.containerGroups.containerGroup1.containers.container3.items" data-model.bind="container3Item" style="border: 1px solid #f0f;">
                     ${container3Item}
                 </li>
         </ul>

@@ -3,45 +3,35 @@ import { DragAndDropController } from 'elements/drag-and-drop-controller';
 /**
  * UNBREAKABLE RULES:
  *      Items can ONLY be exchanged between containers in the same group.
- *      The first/topmost container in the group defines the following for the entire group:
+ *      The first/topmost container in the group defines the following for the entire group. ALL events handlers, etc. must be defined on the first/topmost container:
  *          Events (drag, drop, remove, etc.)
  */
 
- interface ContainerItem {
-    id: string, propertyA: string, propertyB: number
- }
 
 export class App {
     dragAndDropController: DragAndDropController;
-    container0Items: Array<ContainerItem> = new Array<ContainerItem>();
-    container1Items: Array<ContainerItem> = new Array<ContainerItem>();
-    container2Items: Array<ContainerItem> = new Array<ContainerItem>();
-    container3Items: Array<number> = new Array<number>();
 
     attached() {
         this.dragAndDropController = new DragAndDropController(this);
+        this.dragAndDropController.containerGroups.containerGroup0.containers.container0.items.push({ id: "1", propertyA: "item1 propA (container0)", propertyB: 1 })
     }
 
     bind() {
-        this.container0Items.push({ id: "1", propertyA: "item1 propA (container0)", propertyB: 1 });
-        this.container0Items.push({ id: "2", propertyA: "item2 propA (container0)", propertyB: 2 });
-        this.container0Items.push({ id: "3", propertyA: "item3 propA (container0)", propertyB: 3 });
+        // this.container0Items.push({ id: "1", propertyA: "item1 propA (container0)", propertyB: 1 });
+        // this.container0Items.push({ id: "2", propertyA: "item2 propA (container0)", propertyB: 2 });
+        // this.container0Items.push({ id: "3", propertyA: "item3 propA (container0)", propertyB: 3 });
 
-        this.container1Items.push({ id: "4", propertyA: "item4 propA (container1)", propertyB: 4 });
-        this.container1Items.push({ id: "5", propertyA: "item5 propA (container1)", propertyB: 5 });
+        // this.container1Items.push({ id: "4", propertyA: "item4 propA (container1)", propertyB: 4 });
+        // this.container1Items.push({ id: "5", propertyA: "item5 propA (container1)", propertyB: 5 });
 
-        this.container2Items.push({ id: "6", propertyA: "item6 propA (container2)", propertyB: 6 });
+        // this.container2Items.push({ id: "6", propertyA: "item6 propA (container2)", propertyB: 6 });
 
-        this.container3Items.push(112263);
+        // this.container3Items.push(112263);
     }
 
     click_test() {
-        console.log(this.dragAndDropController.containerGroups["containerGroup0"].containers.find((x) => { return x.id == "container0" }).children);
-        console.log(this.dragAndDropController.containerGroups["containerGroup0"].containers.find((x) => { return x.id == "container1" }).children);
-        console.log(this.dragAndDropController.containerGroups["containerGroup0"].containers.find((x) => { return x.id == "container2" }).children);
-        console.log(this.dragAndDropController.containerGroups["alphaOmega"].containers.find((x) => { return x.id == "container3" }).children);
-
-        console.log(this.dragAndDropController.containerGroups["containerGroup0"].containers.find((x) => { return x.id == "container0" }).children[0])
+        console.log(this.dragAndDropController)
+        console.log(this.dragAndDropController.containerGroups.containerGroup0.containers.container0)
     }
 
     cancel_handler0(el: Element, container, source) {

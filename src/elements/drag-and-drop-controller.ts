@@ -1,9 +1,10 @@
+import { Container } from './container';
+import { ContainerGroup } from './container-group';
 import * as dragula from 'dragula';
 
 export class DragAndDropController {
     private callingContext;
-    public containerGroups: { [name: string]: dragula.Drake } = { };
-    public containerItems: { [name: string]: any } = { };
+    public containerGroups: { [id: string]: ContainerGroup } = { };
 
     /**
      * Create, instantiate, and register elements designated by the 'js-drag-and-drop-container' class into logical groups to allow drag-and-drop functionality within those groups. 
@@ -12,40 +13,91 @@ export class DragAndDropController {
     constructor(callingContext) {
         this.callingContext = callingContext;
 
-        this.registerContainers();
+        this.registerContainerGroups(this.containerGroups);
     }
 
-    private registerContainers() {
+    /**
+     * Create, instantiate, and register elements designated by the 'js-drag-and-drop-container' class.
+     * @param containerGroups An object for storing the container groups.
+     */
+    private registerContainerGroups(containerGroups: { [id: string]: ContainerGroup }) {
         // Get all drag-and-drop containers on the page
-        let dragAndDropContainers = Array.from(document.getElementsByClassName("js-drag-and-drop-container"));
+        let containerHTMLElements = Array.from(document.getElementsByClassName("js-drag-and-drop-container"));
         
-        for (let dragAndDropContainer of dragAndDropContainers) {
+        for (let containerHTMLElement of containerHTMLElements) {
             // Get the name of the group the drag-and-drop container belongs to
-            let containerGroupName = dragAndDropContainer.getAttribute("data-container-group");
+            let containerGroupName = containerHTMLElement.getAttribute("data-container-group");
 
             // Attempt to get the group the container belongs to
-            let dragAndDropContainerGroup = this.containerGroups[containerGroupName];
+            let containerGroup = containerGroups[containerGroupName];
 
             // If the group exists
-            if (dragAndDropContainerGroup) {
-                // Add the container to the group
-                dragAndDropContainerGroup.containers.push(dragAndDropContainer);
+            if (containerGroup) {
+                // Add the HTML container element to the Dragula containers
+                containerGroup.dragula.containers.push(containerHTMLElement);
+
+                // Register the container with the internal collection
+                this.registerContainer(containerGroup, containerHTMLElement);
             } else {
-                // Otherwise, create a new group
-                let containerGroup = dragula();
+                // Otherwise, create a new container group
+                containerGroup = new ContainerGroup({ id: containerGroupName });
+                
+                // Create a new container group Dragula object
+                let containerGroupDragula = dragula();
 
-                this.registerEventHandlers(containerGroup, dragAndDropContainer);
+                // Register the event handlers found on the HTML container element
+                this.registerEventHandlers(containerGroupDragula, containerHTMLElement);
 
-                // Add the container to the group
-                containerGroup.containers.push(dragAndDropContainer)
+                // Add the HTML container element to the Dragula container collection
+                containerGroupDragula.containers.push(containerHTMLElement)
 
-                // Add the new group to the collection of groups
-                this.containerGroups[containerGroupName] = containerGroup;
+                // Associate the Dragula object with the container group
+                containerGroup.dragula = containerGroupDragula
+
+                // Add the container group object to the collection of container groups
+                containerGroups[containerGroupName] = containerGroup;
+
+                // Register the container with the internal collection
+                this.registerContainer(containerGroup, containerHTMLElement);
             }
         }
     }
 
-    private registerEventHandler(eventName: string, containerGroup: dragula.Drake, dragAndDropContainer: Element) {
+    /**
+     * Add object references of each HTML item's associated model to the internal collection to be maintained.
+     * @param container 
+     * @param containerHTMLElement 
+     */
+    private registerContainerItems(container: Container, containerHTMLElement: Element) {
+        // Iterate the registered container groups
+        //console.log(container);
+        // Note: Casting .children as any allows 'for' to be used to iterate over the collection
+        for (let containerChild of containerHTMLElement.children as any) {
+            console.log(containerChild.getAttribute('data-model'))
+        }
+    }
+
+    /**
+     * 
+     * @param containerGroup 
+     * @param containerHTMLElement 
+     */
+    private registerContainer(containerGroup: ContainerGroup, containerHTMLElement: Element) {
+        let containerId = containerHTMLElement.id;
+        let container = new Container({ id: containerId });
+        
+        containerGroup.containers[containerId] = container;
+
+        this.registerContainerItems(container, containerHTMLElement)
+    }
+
+    /**
+     * 
+     * @param eventName 
+     * @param dragulaInstance 
+     * @param dragAndDropContainer 
+     */
+    private registerEventHandler(eventName: string, dragulaInstance: dragula.Drake, dragAndDropContainer: Element) {
         // Get the name of the handler from the element.
         let handlerName = dragAndDropContainer.getAttribute(`data-${eventName}`);
         
@@ -55,31 +107,31 @@ export class DragAndDropController {
             if (this.callingContext[handlerName]) {
                 switch (eventName) {
                     case 'cancel':
-                        containerGroup.on(eventName, this.cancelHandler.bind(this, this.callingContext, handlerName, containerGroup, dragAndDropContainer));
+                        dragulaInstance.on(eventName, this.cancelHandler.bind(this, this.callingContext, handlerName, dragulaInstance, dragAndDropContainer));
                         break;
                     case 'cloned':
-                        containerGroup.on(eventName, this.clonedHandler.bind(this, this.callingContext, handlerName, containerGroup, dragAndDropContainer));
+                        dragulaInstance.on(eventName, this.clonedHandler.bind(this, this.callingContext, handlerName, dragulaInstance, dragAndDropContainer));
                         break;
                     case 'drag':
-                        containerGroup.on(eventName, this.dragHandler.bind(this, this.callingContext, handlerName, containerGroup, dragAndDropContainer));
+                        dragulaInstance.on(eventName, this.dragHandler.bind(this, this.callingContext, handlerName, dragulaInstance, dragAndDropContainer));
                         break;
                     case 'dragend':
-                        containerGroup.on(eventName, this.dragEndHandler.bind(this, this.callingContext, handlerName, containerGroup, dragAndDropContainer));
+                        dragulaInstance.on(eventName, this.dragEndHandler.bind(this, this.callingContext, handlerName, dragulaInstance, dragAndDropContainer));
                         break;
                     case 'drop':
-                        containerGroup.on(eventName, this.dropHandler.bind(this, this.callingContext, handlerName, containerGroup, dragAndDropContainer));
+                        dragulaInstance.on(eventName, this.dropHandler.bind(this, this.callingContext, handlerName, dragulaInstance, dragAndDropContainer));
                         break;
                     case 'out':
-                        containerGroup.on(eventName, this.outHandler.bind(this, this.callingContext, handlerName, containerGroup, dragAndDropContainer));
+                        dragulaInstance.on(eventName, this.outHandler.bind(this, this.callingContext, handlerName, dragulaInstance, dragAndDropContainer));
                         break;
                     case 'over':
-                        containerGroup.on(eventName, this.overHandler.bind(this, this.callingContext, handlerName, containerGroup, dragAndDropContainer));
+                        dragulaInstance.on(eventName, this.overHandler.bind(this, this.callingContext, handlerName, dragulaInstance, dragAndDropContainer));
                         break;
                     case 'remove':
-                        containerGroup.on(eventName, this.removeHandler.bind(this, this.callingContext, handlerName, containerGroup, dragAndDropContainer));
+                        dragulaInstance.on(eventName, this.removeHandler.bind(this, this.callingContext, handlerName, dragulaInstance, dragAndDropContainer));
                         break;
                     case 'shadow':
-                        containerGroup.on(eventName, this.shadowHandler.bind(this, this.callingContext, handlerName, containerGroup, dragAndDropContainer));
+                        dragulaInstance.on(eventName, this.shadowHandler.bind(this, this.callingContext, handlerName, dragulaInstance, dragAndDropContainer));
                         break;
                 }
             } else {
@@ -108,6 +160,16 @@ export class DragAndDropController {
     ////////////////////
     // cancel
     ////////////////////
+    /**
+     * 
+     * @param callingContext 
+     * @param handlerName 
+     * @param containerGroup 
+     * @param dragAndDropContainer 
+     * @param element 
+     * @param container 
+     * @param source 
+     */
     private cancelHandler(callingContext, handlerName, containerGroup, dragAndDropContainer, element, container, source) {
         console.log(`happens before ${handlerName} for cancel`)
         callingContext[handlerName](element, container, source);
@@ -117,6 +179,16 @@ export class DragAndDropController {
     ////////////////////
     // cloned
     ////////////////////
+    /**
+     * 
+     * @param callingContext 
+     * @param handlerName 
+     * @param containerGroup 
+     * @param dragAndDropContainer 
+     * @param clone 
+     * @param original 
+     * @param type 
+     */
     private clonedHandler(callingContext, handlerName, containerGroup, dragAndDropContainer, clone, original, type) {
         console.log(`happens before ${handlerName} for cloned`)
         callingContext[handlerName](clone, original, type);
@@ -126,6 +198,15 @@ export class DragAndDropController {
     ////////////////////
     // drag
     ////////////////////
+    /**
+     * 
+     * @param callingContext 
+     * @param handlerName 
+     * @param containerGroup 
+     * @param dragAndDropContainer 
+     * @param element 
+     * @param source 
+     */
     private dragHandler(callingContext, handlerName, containerGroup, dragAndDropContainer, element, source) {
         console.log(`happens before ${handlerName} for drag`)
         callingContext[handlerName](element, source);
@@ -135,6 +216,14 @@ export class DragAndDropController {
     ////////////////////
     // dragend
     ////////////////////
+    /**
+     * 
+     * @param callingContext 
+     * @param handlerName 
+     * @param containerGroup 
+     * @param dragAndDropContainer 
+     * @param element 
+     */
     private dragEndHandler(callingContext, handlerName, containerGroup, dragAndDropContainer, element) {
         console.log(`happens before ${handlerName} for dragend`)
         console.log(containerGroup)
@@ -145,6 +234,17 @@ export class DragAndDropController {
     ////////////////////
     // drop
     ////////////////////
+    /**
+     * 
+     * @param callingContext 
+     * @param handlerName 
+     * @param containerGroup 
+     * @param dragAndDropContainer 
+     * @param element 
+     * @param target 
+     * @param source 
+     * @param sibling 
+     */
     private dropHandler(callingContext, handlerName, containerGroup, dragAndDropContainer, element, target, source, sibling) {
         console.log(`happens before ${handlerName} for drop`)
         callingContext[handlerName](element, target, source, sibling);
@@ -154,6 +254,16 @@ export class DragAndDropController {
     ////////////////////
     // out
     ////////////////////
+    /**
+     * 
+     * @param callingContext 
+     * @param handlerName 
+     * @param containerGroup 
+     * @param dragAndDropContainer 
+     * @param element 
+     * @param container 
+     * @param source 
+     */
     private outHandler(callingContext, handlerName, containerGroup, dragAndDropContainer, element, container, source) {
         console.log(`happens before ${handlerName} for out`)
         callingContext[handlerName](element, container, source);
@@ -163,6 +273,16 @@ export class DragAndDropController {
     ////////////////////
     // over
     ////////////////////
+    /**
+     * 
+     * @param callingContext 
+     * @param handlerName 
+     * @param containerGroup 
+     * @param dragAndDropContainer 
+     * @param element 
+     * @param container 
+     * @param source 
+     */
     private overHandler(callingContext, handlerName, containerGroup, dragAndDropContainer, element, container, source) {
         console.log(`happens before ${handlerName} for over`)
         callingContext[handlerName](element, container, source);
@@ -172,6 +292,16 @@ export class DragAndDropController {
     ////////////////////
     // remove
     ////////////////////
+    /**
+     * 
+     * @param callingContext 
+     * @param handlerName 
+     * @param containerGroup 
+     * @param dragAndDropContainer 
+     * @param element 
+     * @param container 
+     * @param source 
+     */
     private removeHandler(callingContext, handlerName, containerGroup, dragAndDropContainer, element, container, source) {
         console.log(`happens before ${handlerName} for remove`)
         callingContext[handlerName](element, container, source);
@@ -181,6 +311,16 @@ export class DragAndDropController {
     ////////////////////
     // shadow
     ////////////////////
+    /**
+     * 
+     * @param callingContext 
+     * @param handlerName 
+     * @param containerGroup 
+     * @param dragAndDropContainer 
+     * @param element 
+     * @param container 
+     * @param source 
+     */
     private shadowHandler(callingContext, handlerName, containerGroup, dragAndDropContainer, element, container, source) {
         console.log(`happens before ${handlerName} for shadow`)
         callingContext[handlerName](element, container, source);
