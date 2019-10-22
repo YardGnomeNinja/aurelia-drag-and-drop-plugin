@@ -71,6 +71,7 @@ export class DragAndDropController {
     private registerContainerItems(container: Container, containerHTMLElement: Element) {
         // Iterate the registered container groups
         //console.log(container);
+        console.log('inside registerContainerItems')
         // Note: Casting .children as any allows 'for' to be used to iterate over the collection
         for (let containerChild of containerHTMLElement.children as any) {
             console.log(containerChild.getAttribute('data-model'))
@@ -128,7 +129,7 @@ export class DragAndDropController {
     }
 
     /**
-     * Move the model associated with the dropped item out of the container it started in to the container it was dropped in.
+     * Move the model associated with the dropped item, out of the container it started in and to the container it was dropped in.
      * TODO: I feel like this may be able to be streamlined.
      */
     private moveContainerItem(containerGroups, sourceContainerHTMLElement: Element, eventItemHTMLElement: Element, eventTargetContainerHTMLElement: Element, eventNextSiblingItemHTMLElement: Element) {
@@ -163,9 +164,9 @@ export class DragAndDropController {
         return containerGroups[containerGroupId].containers[containerId].items.indexOf(itemModel);
     }
 
-    ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // HANDLERS
-    ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////
     // cancel
@@ -182,15 +183,21 @@ export class DragAndDropController {
      * @param eventSource 
      */
     private cancelHandler(callingContext, containerGroups, userDefinedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement, eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource) {
-        // console.log(`happens before ${handlerName} for cancel`)
+        // console.log(`happens before ${userDefinedHandlerName} for cancel`)
 
+        /////////////////////////////
+        // User Defined Handler
+        /////////////////////////////
         let userDefinedHandler = callingContext[userDefinedHandlerName];
 
+        // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
             userDefinedHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
         }
+        /////////////////////////////
+        /////////////////////////////
     
-        // console.log(`happens after ${handlerName} for cancel`)
+        // console.log(`happens after ${userDefinedHandlerName} for cancel`)
     }
 
     ////////////////////
@@ -208,13 +215,21 @@ export class DragAndDropController {
      * @param eventItemType 
      */
     private clonedHandler(callingContext, containerGroups, userDefinedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement, eventItemClone, eventItemOriginal, eventItemType) {
-        // console.log(`happens before ${handlerName} for cloned`)
+        // console.log(`happens before ${userDefinedHandlerName} for cloned`)
+
+        /////////////////////////////
+        // User Defined Handler
+        /////////////////////////////
         let userDefinedHandler = callingContext[userDefinedHandlerName];
 
+        // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
             userDefinedHandler(eventItemClone, eventItemOriginal, eventItemType);
         }
-        // console.log(`happens after ${handlerName} for cloned`)
+        /////////////////////////////
+        /////////////////////////////
+
+        // console.log(`happens after ${userDefinedHandlerName} for cloned`)
     }
 
     ////////////////////
@@ -231,13 +246,21 @@ export class DragAndDropController {
      * @param eventSource 
      */
     private dragHandler(callingContext, containerGroups, userDefinedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement, eventItemHTMLElement, eventSource) {
-        // console.log(`happens before ${handlerName} for drag`)
+        // console.log(`happens before ${userDefinedHandlerName} for drag`)
+
+        /////////////////////////////
+        // User Defined Handler
+        /////////////////////////////
         let userDefinedHandler = callingContext[userDefinedHandlerName];
 
+        // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
             userDefinedHandler(eventItemHTMLElement, eventSource);
         }
-        // console.log(`happens after ${handlerName} for drag`)
+        /////////////////////////////
+        /////////////////////////////
+
+        // console.log(`happens after ${userDefinedHandlerName} for drag`)
     }
 
     ////////////////////
@@ -253,14 +276,22 @@ export class DragAndDropController {
      * @param eventItemHTMLElement 
      */
     private dragEndHandler(callingContext, containerGroups, userDefinedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement, eventItemHTMLElement) {
-        // console.log(`happens before ${handlerName} for dragend`)
+        // console.log(`happens before ${userDefinedHandlerName} for dragend`)
         // console.log(containerHTMLElement)
+
+        /////////////////////////////
+        // User Defined Handler
+        /////////////////////////////
         let userDefinedHandler = callingContext[userDefinedHandlerName];
 
+        // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
             userDefinedHandler(eventItemHTMLElement);
         }
-        // console.log(`happens after ${handlerName} for dragend`)
+        /////////////////////////////
+        /////////////////////////////
+        
+        // console.log(`happens after ${userDefinedHandlerName} for dragend`)
     }
 
     ////////////////////
@@ -280,12 +311,20 @@ export class DragAndDropController {
      * @param eventNextSiblingItemHTMLElement 
      */
     private dropHandler(callingContext, containerGroups, userDefinedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement, eventItemHTMLElement, eventTargetContainerHTMLElement, eventSourceContainerHTMLElement, eventNextSiblingItemHTMLElement) {
-        // console.log(`happens before ${handlerName} for drop`)
+        // console.log(`happens before ${userDefinedHandlerName} for drop`)
+
+        /////////////////////////////
+        // User Defined Handler
+        /////////////////////////////
         let userDefinedHandler = callingContext[userDefinedHandlerName];
+
+        // Execute userDefinedHandler if it exists
 
         if (userDefinedHandler) {
             userDefinedHandler(eventItemHTMLElement, eventTargetContainerHTMLElement, eventSourceContainerHTMLElement, eventNextSiblingItemHTMLElement);
         }
+        /////////////////////////////
+        /////////////////////////////
 
         // TODO: Identify if there is anything that should stop the move from happening
         this.moveContainerItem(containerGroups, eventSourceContainerHTMLElement, eventItemHTMLElement, eventTargetContainerHTMLElement, eventNextSiblingItemHTMLElement);
@@ -318,7 +357,7 @@ export class DragAndDropController {
      * @param eventSourceContainerHTMLElement 
      */
     private outHandler(callingContext, containerGroups, userDefinedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement, eventItemHTMLElement, eventCurrentlyOverContainerHTMLElement, eventSourceContainerHTMLElement) {
-        // console.log(`happens before ${handlerName} for out`)
+        // console.log(`happens before ${userDefinedHandlerName} for out`)
         // console.log(callingContext)
         // console.log(containerGroups)
         // console.log(handlerName)
@@ -327,12 +366,20 @@ export class DragAndDropController {
         // console.log(eventItemHTMLElement)
         // console.log(eventCurrentlyOverContainerHTMLElement)
         // console.log(eventSourceContainerHTMLElement)
+
+        /////////////////////////////
+        // User Defined Handler
+        /////////////////////////////
         let userDefinedHandler = callingContext[userDefinedHandlerName];
 
+        // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
             userDefinedHandler(eventItemHTMLElement, eventCurrentlyOverContainerHTMLElement, eventSourceContainerHTMLElement);
         }
-        // console.log(`happens after ${handlerName} for out`)
+        /////////////////////////////
+        /////////////////////////////
+
+        // console.log(`happens after ${userDefinedHandlerName} for out`)
     }
 
     ////////////////////
@@ -350,13 +397,21 @@ export class DragAndDropController {
      * @param eventSource 
      */
     private overHandler(callingContext, containerGroups, userDefinedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement, eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource) {
-        // console.log(`happens before ${handlerName} for over`)
+        // console.log(`happens before ${userDefinedHandlerName} for over`)
+        
+        /////////////////////////////
+        // User Defined Handler
+        /////////////////////////////
         let userDefinedHandler = callingContext[userDefinedHandlerName];
 
+        // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
             userDefinedHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
         }
-        // console.log(`happens after ${handlerName} for over`)
+        /////////////////////////////
+        /////////////////////////////
+
+        // console.log(`happens after ${userDefinedHandlerName} for over`)
     }
 
     ////////////////////
@@ -374,13 +429,21 @@ export class DragAndDropController {
      * @param eventSource 
      */
     private removeHandler(callingContext, containerGroups, userDefinedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement, eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource) {
-        // console.log(`happens before ${handlerName} for remove`)
+        // console.log(`happens before ${userDefinedHandlerName} for remove`)
+        
+        /////////////////////////////
+        // User Defined Handler
+        /////////////////////////////
         let userDefinedHandler = callingContext[userDefinedHandlerName];
 
+        // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
             userDefinedHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
         }
-        // console.log(`happens after ${handlerName} for remove`)
+        /////////////////////////////
+        /////////////////////////////
+
+        // console.log(`happens after ${userDefinedHandlerName} for remove`)
     }
 
     ////////////////////
@@ -398,12 +461,20 @@ export class DragAndDropController {
      * @param eventSource 
      */
     private shadowHandler(callingContext, containerGroups, userDefinedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement, eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource) {
-        // console.log(`happens before ${handlerName} for shadow`)
+        // console.log(`happens before ${userDefinedHandlerName} for shadow`)
+        
+        /////////////////////////////
+        // User Defined Handler
+        /////////////////////////////
         let userDefinedHandler = callingContext[userDefinedHandlerName];
 
+        // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
             userDefinedHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
         }
-        // console.log(`happens after ${handlerName} for shadow`)
+        /////////////////////////////
+        /////////////////////////////
+
+        // console.log(`happens after ${userDefinedHandlerName} for shadow`)
     }
 }

@@ -3,8 +3,8 @@ import { DragAndDropController } from 'elements/drag-and-drop-controller';
 /**
  * UNBREAKABLE RULES:
  *      Items can ONLY be exchanged between containers in the same group.
- *      The first/topmost container in the group defines the following for the entire group. ALL events handlers, etc. must be defined on the first/topmost container:
- *          Events (drag, drop, remove, etc.)
+ *      The first/topmost container in the group defines the following for the entire group. 
+ *          Event Handlerss (drag, drop, remove, etc.)
  */
 
 
@@ -24,9 +24,6 @@ export class App {
 
         this.dragAndDropController.containerGroups.alphaOmega.containers.container3.items.push(123456);
         this.dragAndDropController.containerGroups.alphaOmega.containers.container3.items.push("987654");
-    }
-
-    bind() {
     }
 
     click_test() {
