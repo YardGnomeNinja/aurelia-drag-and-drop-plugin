@@ -1,9 +1,11 @@
 import { Container } from './container';
 
 export class ContainerGroup {
-    id:         string;
-    dragula:    dragula.Drake;
     containers: { [id: string]: Container } = { };
+    copy: any;
+    copySortSource: boolean;
+    dragula: dragula.Drake;
+    id: string;
 
     constructor(init?:Partial<ContainerGroup>) {
         Object.assign(this, init);

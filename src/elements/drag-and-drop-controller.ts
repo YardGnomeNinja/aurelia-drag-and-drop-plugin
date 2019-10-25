@@ -1,7 +1,13 @@
+// See https://github.com/bevacqua/dragula#usage for details on Dragula's implementation specifics.
+
 import { Container } from './container';
 import { ContainerGroup } from './container-group';
 import * as dragula from 'dragula';
 
+/**
+ * IMPORTANT: Copying is currently "shallow". Functions and object references will not be available to "copied" items.
+ * TODO: Fix "shallow" copying with Lodash https://lodash.com/
+ */
 export class DragAndDropController {
     private callingContext;
     public containerGroups: { [id: string]: ContainerGroup } = { };
@@ -14,6 +20,126 @@ export class DragAndDropController {
         this.callingContext = callingContext;
 
         this.registerContainerGroups(this.containerGroups);
+    }
+
+    private buildDragulaOptions(callingContext, containerGroup, containerGroupLeaderHTMLElement: Element) {
+        let result = {};
+
+        //////////////////////
+        // accepts
+        // https://github.com/bevacqua/dragula#optionsaccepts
+        //////////////////////
+        // data-option-accepts-check="accepts_check"
+        // (el, target, source, sibling)
+        // return true;
+
+        //////////////////////
+        // copy
+        // Specifies whether or not elements are copied when dropped.
+        // https://github.com/bevacqua/dragula#optionscopy
+        //////////////////////
+        let optionCopy = containerGroupLeaderHTMLElement.getAttribute('data-option-copy').trim();
+
+        if (optionCopy != undefined && optionCopy != "") {
+            let optionCopyLowercase = optionCopy.toLowerCase();
+
+            // If the option specifies a boolean.
+            if (optionCopyLowercase == 'true' || optionCopyLowercase == 'false') {
+                containerGroup.copy = optionCopyLowercase == 'true';
+                result["copy"] = optionCopyLowercase == 'true';    
+            } else {
+                // If there is a function in the calling context matching the provided name, use it to determine if copy is true.
+                let copyCheckFunction = callingContext[optionCopy];
+
+                if (copyCheckFunction) {
+                    containerGroup.copy = copyCheckFunction;
+                    result["copy"] = copyCheckFunction;    
+                }
+            }
+        }
+
+        //////////////////////
+        // copySortSource
+        // https://github.com/bevacqua/dragula#optionscopysortsource
+        //////////////////////
+        let optionCopySortSource = containerGroupLeaderHTMLElement.getAttribute('data-option-copy-sort-source').trim();
+
+        if (optionCopySortSource != undefined && optionCopySortSource != "") {
+            let copySortSource = optionCopySortSource.toLowerCase() == 'true';
+
+            if (copySortSource) {
+                console.warn(
+                    `WARNING: The drag-and-drop container group \"${containerGroup.id}\" is using \"copySortSource\" functionality which contains a known bug that should be addressed before deploying to production.
+                    \n Follow these steps to reproduce the bug and determine if you are okay with the consequences.
+                    \n    1. Add two or more items to a container. 
+                    \n    2. Begin to drag any item, except the last item, and drop it on itself or immediately above or below it on the \"sort placeholder\". This effectively cancels the drag, however with unintended concequences.
+                    \n    3. Drag any \"lower\" item to the \"sort placeholder\" immediately above the item from step 2.
+                    \nThe console should display the following error \"TypeError: refNode.parentNode is null\" from aurelia-templating.js. The dragged element will also be removed. This is due to the fact that under normal circumstances moving the item model causes Aurelia Templating to create a new element and retain the element moved by Dragula, thus causing duplication of elements. In the event of the bug, Aurelia Templating is unable to create a new element and the dragged element is removed.`
+                );
+            }
+
+            containerGroup.copySortSource = copySortSource;
+            result["copySortSource"] = copySortSource;    
+        }
+
+        //////////////////////
+        // direction
+        // https://github.com/bevacqua/dragula#optionsdirection
+        //////////////////////
+        // data-option-direction=""
+
+        //////////////////////
+        // ignoreInputTextSelection
+        // https://github.com/bevacqua/dragula#optionsignoreinputtextselection
+        //////////////////////
+        // data-option-ignore-input-text-selection=""
+
+        //////////////////////
+        // invalid
+        // https://github.com/bevacqua/dragula#optionsinvalid
+        //////////////////////
+        // data-option-invalid-check="invalid_check"
+        // (el, handle)
+        // return false;
+
+        //////////////////////
+        // isContainer
+        // https://github.com/bevacqua/dragula#optionsiscontainer
+        //////////////////////
+        // data-option-is-container-check="isContainer_check"
+        // (el)
+        // return false;
+
+        //////////////////////
+        // mirrorContainer
+        // https://github.com/bevacqua/dragula#optionsmirrorcontainer
+        //////////////////////
+        // data-option-mirror-container=""
+
+        //////////////////////
+        // moves
+        // https://github.com/bevacqua/dragula#optionsmoves
+        //////////////////////
+        // data-option-moves-check="moves_check"
+        // (el, source, handle, sibling)
+        // return true;
+
+        //////////////////////
+        // removeOnSpill
+        // https://github.com/bevacqua/dragula#optionsremoveonspill
+        //////////////////////
+        // data-option-remove-on-spill=""
+
+        //////////////////////
+        // revertOnSpill
+        // https://github.com/bevacqua/dragula#optionsrevertonspill
+        //////////////////////
+        // data-option-revert-on-spill=""
+
+        // console.log(callingContext);
+        // console.log(containerGroupLeaderHTMLElement);
+
+        return result;
     }
 
     /**
@@ -43,9 +169,9 @@ export class DragAndDropController {
                 containerGroup = new ContainerGroup({ id: containerGroupName });
                 
                 // Create a new container group Dragula object
-                let containerGroupDragula = dragula();
+                let containerGroupDragula = dragula(this.buildDragulaOptions(this.callingContext, containerGroup, containerHTMLElement));
 
-                // Register the event handlers found on the HTML container element
+                // Register the Event Handlers found on the HTML container element
                 this.registerEventHandlers(containerGroupDragula, containerHTMLElement);
 
                 // Add the HTML container element to the Dragula container collection
@@ -64,64 +190,93 @@ export class DragAndDropController {
     }
 
     /**
-     * Add object references of each HTML item's associated model to the internal collection to be maintained.
-     * @param container 
-     * @param containerHTMLElement 
+     * Get a Container.
+     * @param containerGroupId 
+     * @param containerId 
      */
-    private registerContainerItems(container: Container, containerHTMLElement: Element) {
-        // Iterate the registered container groups
-        //console.log(container);
-        console.log('inside registerContainerItems')
-        // Note: Casting .children as any allows 'for' to be used to iterate over the collection
-        for (let containerChild of containerHTMLElement.children as any) {
-            console.log(containerChild.getAttribute('data-model'))
+    public getContainer(containerGroupId: string, containerId: string) {
+        let containerGroup = this.containerGroups[containerGroupId];
+
+        if (containerGroup) {
+            return containerGroup.containers[containerId];
         }
+
+        return undefined; 
     }
 
     /**
-     * 
-     * @param containerGroup 
-     * @param containerHTMLElement 
+     * Get a Container Group.
+     * @param containerGroupId 
      */
-    private registerContainer(containerGroup: ContainerGroup, containerHTMLElement: Element) {
-        let containerId = containerHTMLElement.id;
-        let container = new Container({ id: containerId });
-        
-        containerGroup.containers[containerId] = container;
-
-        this.registerContainerItems(container, containerHTMLElement)
+    public getContainerGroup(containerGroupId: string) {
+        return this.containerGroups[containerGroupId];
     }
 
     /**
-     * 
-     * @param eventName 
-     * @param dragulaInstance 
-     * @param containerGroupLeaderHTMLElement 
+     * Get the items in the Container.
+     * @param containerGroupId
+     * @param containerId 
      */
-    private registerEventHandlers(dragulaInstance: dragula.Drake, containerGroupLeaderHTMLElement: Element) {
-        // Get the name of the handlers from the element.
-        let userDefinedCancelHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-cancel');
-        let userDefinedClonedHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-cloned');
-        let userDefinedDragHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-drag');
-        let userDefinedDragEndHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-dragend');
-        let userDefinedDropHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-drop');
-        let userDefinedOutHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-out');
-        let userDefinedOverHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-over');
-        let userDefinedRemoveHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-remove');
-        let userDefinedShadowHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-shadow');
-        
+    public getContainerItems(containerGroupId: string, containerId: string) {
+        let containerGroup = this.containerGroups[containerGroupId];
 
-        dragulaInstance.on('cancel', this.cancelHandler.bind(this, this.callingContext, this.containerGroups, userDefinedCancelHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
-        dragulaInstance.on('cloned', this.clonedHandler.bind(this, this.callingContext, this.containerGroups, userDefinedClonedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
-        dragulaInstance.on('drag', this.dragHandler.bind(this, this.callingContext, this.containerGroups, userDefinedDragHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
-        dragulaInstance.on('dragend', this.dragEndHandler.bind(this, this.callingContext, this.containerGroups, userDefinedDragEndHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
-        dragulaInstance.on('drop', this.dropHandler.bind(this, this.callingContext, this.containerGroups, userDefinedDropHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
-        dragulaInstance.on('out', this.outHandler.bind(this, this.callingContext, this.containerGroups, userDefinedOutHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
-        dragulaInstance.on('over', this.overHandler.bind(this, this.callingContext, this.containerGroups, userDefinedOverHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
-        dragulaInstance.on('remove', this.removeHandler.bind(this, this.callingContext, this.containerGroups, userDefinedRemoveHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
-        dragulaInstance.on('shadow', this.shadowHandler.bind(this, this.callingContext, this.containerGroups, userDefinedShadowHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
+        if (containerGroup) {
+            let container = containerGroup.containers[containerId];
+
+            if (container) {
+                return container.items;
+            }
+        }
+
+        return undefined; 
     }
 
+    /**
+     * Copy the model associated with the dropped item from the container it started in and to the container it was dropped in.
+     */
+    private copyContainerItem(containerGroups, sourceContainerHTMLElement: Element, eventItemHTMLElement: Element, eventTargetContainerHTMLElement: Element, eventNextSiblingItemHTMLElement: Element) {
+        // Get source container info
+        let sourceContainerGroupId = sourceContainerHTMLElement.getAttribute('data-container-group');
+        let sourceContainerId = sourceContainerHTMLElement.id;
+
+        // Get event item info
+        let eventItemDataModel = eventItemHTMLElement.getAttribute('data-model');
+        let eventItemModel = this.getItem(containerGroups, sourceContainerGroupId, sourceContainerId, eventItemDataModel);
+        // let eventItemModelIndex = this.getItemIndex(containerGroups, sourceContainerGroupId, sourceContainerId, eventItemModel);
+
+        // Get target container info
+        let targetContainerGroupId = eventTargetContainerHTMLElement.getAttribute('data-container-group');
+        let targetContainerId = eventTargetContainerHTMLElement.id;
+
+        // Get info about where the item was moved to
+        let eventNextSiblingItemDataModel = eventNextSiblingItemHTMLElement == null || eventNextSiblingItemHTMLElement == undefined ? undefined : eventNextSiblingItemHTMLElement.getAttribute('data-model');
+        let eventNextSiblingItemModel = this.getItem(containerGroups, targetContainerGroupId, targetContainerId, eventNextSiblingItemDataModel);
+        let eventNextSiblingItemModelIndex = this.getItemIndex(containerGroups, targetContainerGroupId, targetContainerId, eventNextSiblingItemModel);
+
+        // Get item from original container and retain the instance
+        // let sourceItem = containerGroups[sourceContainerGroupId].containers[sourceContainerId].items.splice(eventItemModelIndex, 1)[0];
+
+        // Shallow Clone, No Methods
+        // TODO: Consider using Lodash to properly clone https://lodash.com/
+        let eventItemModelClone = JSON.parse(JSON.stringify(eventItemModel));
+
+        // Add item to new container
+        // If the next sibling has an index, use it. Otherwise the item was dropped at the "bottom" and the index must be determined by the length of the collection.
+        let targetIndex = eventNextSiblingItemModelIndex != -1 ? eventNextSiblingItemModelIndex : containerGroups[targetContainerGroupId].containers[targetContainerId].items.length;
+        containerGroups[targetContainerGroupId].containers[targetContainerId].items.splice(targetIndex, 0, eventItemModelClone);
+
+        // Remove copied element from DOM. This is necessary due to the fact that adding the event item model clone to the container creates its own DOM element.
+        //console.log(`removing ${eventItemHTMLElement.getAttribute("data-model")} via copy`)
+        eventItemHTMLElement.remove();
+    }
+
+    /**
+     * Get the item matching the eventItemDataModel provided.
+     * @param containerGroups 
+     * @param sourceContainerGroupId 
+     * @param sourceContainerId 
+     * @param eventItemDataModel 
+     */
     private getItem(containerGroups, sourceContainerGroupId: string, sourceContainerId: string, eventItemDataModel: string) {
         let containerItems = containerGroups[sourceContainerGroupId].containers[sourceContainerId].items;
 
@@ -140,7 +295,6 @@ export class DragAndDropController {
         // Get event item info
         let eventItemDataModel = eventItemHTMLElement.getAttribute('data-model');
         let eventItemModel = this.getItem(containerGroups, sourceContainerGroupId, sourceContainerId, eventItemDataModel);
-        let eventItemModelIndex = this.getItemIndex(containerGroups, sourceContainerGroupId, sourceContainerId, eventItemModel);
 
         // Get target container info
         let targetContainerGroupId = eventTargetContainerHTMLElement.getAttribute('data-container-group');
@@ -149,19 +303,124 @@ export class DragAndDropController {
         // Get info about where the item was moved to
         let eventNextSiblingItemDataModel = eventNextSiblingItemHTMLElement == null || eventNextSiblingItemHTMLElement == undefined ? undefined : eventNextSiblingItemHTMLElement.getAttribute('data-model');
         let eventNextSiblingItemModel = this.getItem(containerGroups, targetContainerGroupId, targetContainerId, eventNextSiblingItemDataModel);
-        let eventNextSiblingItemModelIndex = this.getItemIndex(containerGroups, targetContainerGroupId, targetContainerId, eventNextSiblingItemModel);
 
-        // Remove item from original container and retain the instance
-        let sourceItem = containerGroups[sourceContainerGroupId].containers[sourceContainerId].items.splice(eventItemModelIndex, 1)[0];
+        // If a move happens within the same container
+        if (sourceContainerHTMLElement == eventTargetContainerHTMLElement) {
+            // Sorting...
 
-        // Add item to new container
-        // If the next sibling has an index, use it. Otherwise the item was dropped at the "bottom" and the index must be determined by the length of the collection.
-        let targetIndex = eventNextSiblingItemModelIndex != -1 ? eventNextSiblingItemModelIndex : containerGroups[targetContainerGroupId].containers[targetContainerId].items.length;
-        containerGroups[targetContainerGroupId].containers[targetContainerId].items.splice(targetIndex, 0, sourceItem);
+            // Get event item index
+            let eventItemModelIndex = this.getItemIndex(containerGroups, sourceContainerGroupId, sourceContainerId, eventItemModel);
+
+            // Get sibling index
+            let eventNextSiblingItemModelIndex = this.getItemIndex(containerGroups, targetContainerGroupId, targetContainerId, eventNextSiblingItemModel);
+
+            // If the item changed positions
+            if (eventItemModelIndex != eventNextSiblingItemModelIndex) {
+                let sourceItem = containerGroups[sourceContainerGroupId].containers[sourceContainerId].items.splice(eventItemModelIndex, 1)[0];
+                let targetIndex = undefined;
+
+                // If the item was moved to the bottom during the reordering
+                if (eventNextSiblingItemModelIndex == -1) {
+                    targetIndex = containerGroups[targetContainerGroupId].containers[targetContainerId].items.length;
+                } else {
+                    // If the item was moved down the list during the reordering
+                    if (eventItemModelIndex < eventNextSiblingItemModelIndex) {
+                        targetIndex = eventNextSiblingItemModelIndex - 1;
+                    }
+                    
+                    // If the item was moved up the list during the reordering
+                    if (eventItemModelIndex > eventNextSiblingItemModelIndex) {
+                        targetIndex = eventNextSiblingItemModelIndex;
+                    }
+                }
+
+                // Move the eventItemModel
+                containerGroups[targetContainerGroupId].containers[targetContainerId].items.splice(targetIndex, 0, sourceItem);
+
+                // The Aurelia Templating engine will create a new element when the sourceItem is added back to the collection.
+                // Remove the item Dragula moved in the DOM to avoid having duplicates of the same element.
+                eventItemHTMLElement.remove();
+            }
+        } else {
+            // Moving...
+
+            // Get event item index
+            let eventItemModelIndex = this.getItemIndex(containerGroups, sourceContainerGroupId, sourceContainerId, eventItemModel);
+
+            // Remove item from original container and retain the instance
+            let sourceItem = containerGroups[sourceContainerGroupId].containers[sourceContainerId].items.splice(eventItemModelIndex, 1)[0];
+
+            // Get sibling index
+            let eventNextSiblingItemModelIndex = this.getItemIndex(containerGroups, targetContainerGroupId, targetContainerId, eventNextSiblingItemModel);
+
+            // Add item to new container
+            // If the next sibling has an index, use it. Otherwise the item was dropped at the "bottom" and the index must be determined by the length of the collection.
+            let targetIndex = eventNextSiblingItemModelIndex != -1 ? eventNextSiblingItemModelIndex : containerGroups[targetContainerGroupId].containers[targetContainerId].items.length;
+            containerGroups[targetContainerGroupId].containers[targetContainerId].items.splice(targetIndex, 0, sourceItem);
+        }
     }
 
+    /**
+     * Get the index of the item that matches the itemModel provided.
+     * @param containerGroups 
+     * @param containerGroupId 
+     * @param containerId 
+     * @param itemModel 
+     */
     getItemIndex(containerGroups, containerGroupId, containerId, itemModel) {
         return containerGroups[containerGroupId].containers[containerId].items.indexOf(itemModel);
+    }
+
+    /**
+     * Register a Container.
+     * @param containerGroup 
+     * @param containerHTMLElement 
+     */
+    private registerContainer(containerGroup: ContainerGroup, containerHTMLElement: Element) {
+        let containerId = containerHTMLElement.id;
+        let container = new Container({ id: containerId });
+        
+        containerGroup.containers[containerId] = container;
+    }
+
+    /**
+     * Register a collection of Items with a Container.
+     * @param containerGroupId 
+     * @param containerId 
+     * @param items 
+     */
+    public registerContainerItems(containerGroupId: string, containerId: string, items: Array<any>) {
+        this.containerGroups[containerGroupId].containers[containerId].items = items;
+    }
+
+    /**
+     * Register Event Handlers for a Container Group.
+     * @param eventName 
+     * @param dragulaInstance 
+     * @param containerGroupLeaderHTMLElement 
+     */
+    private registerEventHandlers(dragulaInstance: dragula.Drake, containerGroupLeaderHTMLElement: Element) {
+        // Get the name of the handlers from the element.
+        let userDefinedCancelHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-cancel-handler');
+        let userDefinedClonedHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-cloned-handler');
+        let userDefinedDragHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-drag-handler');
+        let userDefinedDragEndHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-dragend-handler');
+        let userDefinedDropHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-drop-handler');
+        let userDefinedOutHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-out-handler');
+        let userDefinedOverHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-over-handler');
+        let userDefinedRemoveHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-remove-handler');
+        let userDefinedShadowHandlerName = containerGroupLeaderHTMLElement.getAttribute('data-shadow-handler');
+        
+
+        dragulaInstance.on('cancel', this.cancelHandler.bind(this, this.callingContext, this.containerGroups, userDefinedCancelHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
+        dragulaInstance.on('cloned', this.clonedHandler.bind(this, this.callingContext, this.containerGroups, userDefinedClonedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
+        dragulaInstance.on('drag', this.dragHandler.bind(this, this.callingContext, this.containerGroups, userDefinedDragHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
+        dragulaInstance.on('dragend', this.dragEndHandler.bind(this, this.callingContext, this.containerGroups, userDefinedDragEndHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
+        dragulaInstance.on('drop', this.dropHandler.bind(this, this.callingContext, this.containerGroups, userDefinedDropHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
+        dragulaInstance.on('out', this.outHandler.bind(this, this.callingContext, this.containerGroups, userDefinedOutHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
+        dragulaInstance.on('over', this.overHandler.bind(this, this.callingContext, this.containerGroups, userDefinedOverHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
+        dragulaInstance.on('remove', this.removeHandler.bind(this, this.callingContext, this.containerGroups, userDefinedRemoveHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
+        dragulaInstance.on('shadow', this.shadowHandler.bind(this, this.callingContext, this.containerGroups, userDefinedShadowHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +431,7 @@ export class DragAndDropController {
     // cancel
     ////////////////////
     /**
-     * 
+     * Defines the default 'cancel' Event Handler which calls the user defined 'cancel' Event Handler if one is defined on the first/topmost Container in the group.
      * @param callingContext 
      * @param containerGroups 
      * @param handlerName 
@@ -204,7 +463,7 @@ export class DragAndDropController {
     // cloned
     ////////////////////
     /**
-     * 
+     * Defines the default 'cloned' Event Handler which calls the user defined 'cloned' Event Handler if one is defined on the first/topmost Container in the group.
      * @param callingContext 
      * @param containerGroups 
      * @param handlerName 
@@ -236,7 +495,7 @@ export class DragAndDropController {
     // drag
     ////////////////////
     /**
-     * 
+     * Defines the default 'drag' Event Handler which calls the user defined 'drag' Event Handler if one is defined on the first/topmost Container in the group.
      * @param callingContext 
      * @param containerGroups 
      * @param handlerName 
@@ -267,7 +526,7 @@ export class DragAndDropController {
     // dragend
     ////////////////////
     /**
-     * 
+     * Defines the default 'dragend' Event Handler which calls the user defined 'dragend' Event Handler if one is defined on the first/topmost Container in the group.
      * @param callingContext 
      * @param containerGroups 
      * @param handlerName 
@@ -298,7 +557,7 @@ export class DragAndDropController {
     // drop
     ////////////////////
     /**
-     * 
+     * Defines the default 'drop' Event Handler which calls the user defined 'drop' Event Handler if one is defined on the first/topmost Container in the group.
      * NOTE: A null, eventNextSiblingItemHTMLElement, indicates that the item was dropped at the 'bottom' of the list.
      * @param callingContext 
      * @param containerGroups 
@@ -310,7 +569,7 @@ export class DragAndDropController {
      * @param eventSourceContainerHTMLElement 
      * @param eventNextSiblingItemHTMLElement 
      */
-    private dropHandler(callingContext, containerGroups, userDefinedHandlerName, dragulaInstance, containerGroupLeaderHTMLElement, eventItemHTMLElement, eventTargetContainerHTMLElement, eventSourceContainerHTMLElement, eventNextSiblingItemHTMLElement) {
+    private dropHandler(callingContext, containerGroups, userDefinedHandlerName, dragulaInstance: dragula.Drake, containerGroupLeaderHTMLElement: HTMLElement, eventItemHTMLElement, eventTargetContainerHTMLElement, eventSourceContainerHTMLElement, eventNextSiblingItemHTMLElement) {
         // console.log(`happens before ${userDefinedHandlerName} for drop`)
 
         /////////////////////////////
@@ -326,27 +585,39 @@ export class DragAndDropController {
         /////////////////////////////
         /////////////////////////////
 
-        // TODO: Identify if there is anything that should stop the move from happening
-        this.moveContainerItem(containerGroups, eventSourceContainerHTMLElement, eventItemHTMLElement, eventTargetContainerHTMLElement, eventNextSiblingItemHTMLElement);
+        // Get the id of the container group involved
+        let containerGroupId = containerGroupLeaderHTMLElement.getAttribute('data-container-group');
 
-        // console.log(callingContext)
-        // console.log(containerGroups)
-        // console.log(handlerName)
-        // console.log(dragulaInstance)
-        // console.log(sourceContainerHTMLElement)
-        // console.log(eventItemHTMLElement)
-        // console.log(eventTargetContainerHTMLElement)
-        // console.log(eventSourceContainerHTMLElement)
-        // console.log(eventNextSiblingItemHTMLElement)
-        // Don't drop if user handler cancels it?
-        // Reorder the item collection based on the new order
+        // If the container group is configured for copying items
+        if (this.containerGroups[containerGroupId].copy) {
+            // If there isn't a target, there's nothing to copy
+            if (eventTargetContainerHTMLElement != null) {
+                // If the container group is configured for copying items and allows sorting within the same container
+                if (this.containerGroups[containerGroupId].copySortSource) {
+                    // Check if the source container and target container are the same
+                    if (eventSourceContainerHTMLElement == eventTargetContainerHTMLElement) {
+                        // If the source container and target container are the same, move the item within the same collection
+                        this.moveContainerItem(containerGroups, eventSourceContainerHTMLElement, eventItemHTMLElement, eventTargetContainerHTMLElement, eventNextSiblingItemHTMLElement);
+                    } else {
+                        // If the source container and target container are different, copy the item
+                        this.copyContainerItem(containerGroups, eventSourceContainerHTMLElement, eventItemHTMLElement, eventTargetContainerHTMLElement, eventNextSiblingItemHTMLElement);
+                    }
+                } else {
+                    // Sorting within the same container is not possible, copy the item
+                    this.copyContainerItem(containerGroups, eventSourceContainerHTMLElement, eventItemHTMLElement, eventTargetContainerHTMLElement, eventNextSiblingItemHTMLElement);
+                }
+            }
+        } else {
+            // Move the item
+            this.moveContainerItem(containerGroups, eventSourceContainerHTMLElement, eventItemHTMLElement, eventTargetContainerHTMLElement, eventNextSiblingItemHTMLElement);
+        }
     }
 
     ////////////////////
     // out
     ////////////////////
     /**
-     * 
+     * Defines the default 'out' Event Handler which calls the user defined 'out' Event Handler if one is defined on the first/topmost Container in the group.
      * @param callingContext 
      * @param containerGroups 
      * @param handlerName 
@@ -386,7 +657,7 @@ export class DragAndDropController {
     // over
     ////////////////////
     /**
-     * 
+     * Defines the default 'over' Event Handler which calls the user defined 'over' Event Handler if one is defined on the first/topmost Container in the group.
      * @param callingContext 
      * @param containerGroups 
      * @param handlerName 
@@ -418,7 +689,7 @@ export class DragAndDropController {
     // remove
     ////////////////////
     /**
-     * 
+     * Defines the default 'remove' Event Handler which calls the user defined 'remove' Event Handler if one is defined on the first/topmost Container in the group.
      * @param callingContext 
      * @param containerGroups 
      * @param handlerName 
@@ -450,7 +721,7 @@ export class DragAndDropController {
     // shadow
     ////////////////////
     /**
-     * 
+     * Defines the default 'shadow' Event Handler which calls the user defined 'shadow' Event Handler if one is defined on the first/topmost Container in the group.
      * @param callingContext 
      * @param containerGroups 
      * @param handlerName 

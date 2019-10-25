@@ -2,77 +2,88 @@
     <require from="elements/drag-and-drop.css"></require>
 
     <h1>Hello, this is the dev app for plugin aurelia-drag-and-drop-plugin</h1>
-  <p>This dev app is bundled to scripts/ folder (ignored in .gitignore). If you commit the bundle files to github, this app can serve as a <a href="https://pages.github.com" target="_blank">github page</a>!</p>
+    <p>This dev app is bundled to scripts/ folder (ignored in .gitignore). If you commit the bundle files to github, this app can serve as a <a href="https://pages.github.com" target="_blank">github page</a>!</p>
 
-  <p>Please read the <a href="README.md">README</a> file in your project for more information.</p>
+    <p>Please read the <a href="README.md">README</a> file in your project for more information.</p>
 
-  <hr>
-  <h2>Custom element "drag-and-drop-container"</h2>
-  <p>Usage:&nbsp;<code>&lt;drag-and-drop-container message.bind="message"&gt;&lt;/drag-and-drop-container&gt;</code></p>
-  <!-- <drag-and-drop-container id="container0" data-group="group0" items.bind="items"></drag-and-drop-container> -->
-  <button click.delegate="click_test()">Test</button>
+    <hr>
+    <!-- <h2>Custom element "drag-and-drop-container"</h2>
+    <p>Usage:&nbsp;<code>&lt;drag-and-drop-container message.bind="message"&gt;&lt;/drag-and-drop-container&gt;</code></p> -->
+    <!-- <drag-and-drop-container id="container0" data-group="group0" items.bind="items"></drag-and-drop-container> -->
+    <button click.delegate="click_me()">Click Me</button>
+    <br />
+    <br />
     <div style="border: 5px solid #000;">
+        containerGroup0 - container0
         <ul
-            style="padding: 10px;"
             class="container js-drag-and-drop-container"
-            id="container0"
+            data-option-copy="true"
+            data-option-copy-sort-source="false"
+            data-option-direction=""
+            data-option-ignore-input-text-selection=""
+            data-option-mirror-container=""
+            data-option-remove-on-spill=""
+            data-option-revert-on-spill=""
+            data-option-accepts-check="accepts_check"
+            data-option-invalid-check="invalid_check"
+            data-option-moves-check="moves_check"
+            data-cancel-handler="cancel_handler0"
+            data-cloned-handler="cloned_handler0"
             data-container-group="containerGroup0"
-            data-accepts-from-container="container0"
-            data-drag="drag_handler0"
-            data-dragend="dragend_handler0"
-            data-drop="drop_handler0"
-            data-cancel="cancel_handler0"
-            data-remove="remove_handler0"
-            data-shadow="shadow_handler0"
-            data-over="over_handler0"
-            data-out="out_handler0"
-            data-cloned="cloned_handler0">
-                <li repeat.for="container0Item of dragAndDropController.containerGroups.containerGroup0.containers.container0.items" data-model.bind="container0Item" style="border: 1px solid #f00;">
-                    ${container0Item.id} - ${container0Item.propertyA} - ${container0Item.propertyB}
+            data-drag-handler="drag_handler0"
+            data-dragend-handler="dragend_handler0"
+            data-drop-handler="drop_handler0"
+            data-remove-handler="remove_handler0"
+            data-shadow-handler="shadow_handler0"
+            data-over-handler="over_handler0"
+            data-out-handler="out_handler0"
+            style="padding: 10px;"
+            id="container0">
+                <li repeat.for="container0Item of dragAndDropController.getContainerItems('containerGroup0','container0')" click.delegate="boop($event.target)" data-model.bind="container0Item" style="border: 1px solid #f00;">
+                    ${container0Item.id} - ${container0Item.propertyY} - ${container0Item.propertyZ}
                 </li>
         </ul>    
     </div>
-    <div style="border: 10px solid #000;">
+    <br />
+    <div style="border: 5px solid #000;">
+        containerGroup0 - container1
         <ul
-            style="padding: 10px;"
             class="container js-drag-and-drop-container"
-            id="container1"
             data-container-group="containerGroup0"
-            data-accepts-from-container="container0,container1"
-            data-drag="drag_handler0"
-            data-dragend="dragend_handler0"
-            data-drop="drop_handler0"
-            data-cancel="cancel_handler0"
-            data-remove="remove_handler0"
-            data-shadow="shadow_handler0"
-            data-over="over_handler0"
-            data-out="out_handler0"
-            data-cloned="cloned_handler0">
-                <li repeat.for="container1Item of dragAndDropController.containerGroups.containerGroup0.containers.container1.items" data-model.bind="container1Item" style="border: 1px solid #0f0;">
-                    ${container1Item.id} - ${container1Item.propertyA} - ${container1Item.propertyB}
+            id="container1"
+            style="padding: 10px;">
+                <li repeat.for="container1Item of dragAndDropController.getContainerItems('containerGroup0','container1')" data-model.bind="container1Item" style="border: 1px solid #0f0;">
+                    ${container1Item.id} - ${container1Item.propertyY} - ${container1Item.propertyZ}
                 </li>
         </ul>
     </div>
-    <div style="border: 15px solid #000;">
+    <br />
+    <div style="border: 5px solid #000;">
+        containerGroup0 - container2
         <ul
-            style="padding: 10px;"
             class="js-drag-and-drop-container"
-            id="container2"
             data-container-group="containerGroup0"
-            data-accepts-from-container="container0,container1,container2">
-            <li repeat.for="container2Item of dragAndDropController.containerGroups.containerGroup0.containers.container2.items" data-model.bind="container2Item" style="border: 1px solid #00f;">
-                ${container2Item.id} - ${container2Item.propertyA} - ${container2Item.propertyB}
+            id="container2"
+            style="padding: 10px;">
+            <li repeat.for="container2Item of dragAndDropController.getContainerItems('containerGroup0','container2')" data-model.bind="container2Item" style="border: 1px solid #00f;">
+                ${container2Item.id} - ${container2Item.propertyY} - ${container2Item.propertyZ}
             </li>
         </ul>
     </div>
-    <div style="border: 20px solid #000;">
+    <br />
+    <div style="border: 5px solid #000;">
+        alphaOmega - container3
         <ul
-            style="padding: 10px;"
             class="js-drag-and-drop-container"
-            id="container3"
             data-container-group="alphaOmega"
-            data-dragend="dragend_handler0">
-                <li repeat.for="container3Item of dragAndDropController.containerGroups.alphaOmega.containers.container3.items" data-model.bind="container3Item" style="border: 1px solid #f0f;">
+            data-drag-handler="drag_handler1"
+            data-dragend-handler="dragend_handler1"
+            data-drop-handler="drop_handler1"
+            data-option-copy="copy_check"
+            data-option-copy-sort-source="true"
+            id="container3"
+            style="padding: 10px;">
+                <li repeat.for="container3Item of dragAndDropController.getContainerItems('alphaOmega','container3')" data-model.bind="container3Item" style="border: 1px solid #f0f;">
                     ${container3Item}
                 </li>
         </ul>
