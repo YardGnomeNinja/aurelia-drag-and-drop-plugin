@@ -24,7 +24,7 @@ export class DragAndDropController {
         if (!this.hideWarnings) {
             console.warn(
                 `WARNING: This plugin is a work in progress and contains a few known bugs and probably many more that are unknown.
-                \nIf you accept the risks involved, you can silence this and other warning messages by setting the controller's 'hideWarnings' property to 'true'.
+                \nIf you accept the risks involved, you can silence this and other warning messages by passing a boolean 'true' as the final parameter when creating a new DragAndDropController.
                 \nPlease THOROUGHLY test the functionality for your implementation. There are a lot of moving parts here and I'm certain some things have been overlooked.`);
         }
 
