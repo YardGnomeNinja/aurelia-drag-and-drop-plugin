@@ -548,7 +548,7 @@ export class DragAndDropController {
      * @param containerGroup 
      * @param containerHTMLElement 
      */
-    private registerContainer(containerGroup: ContainerGroup, containerHTMLElement: Element) {
+    public registerContainer(containerGroup: ContainerGroup, containerHTMLElement: Element) {
         let containerId = containerHTMLElement.id;
         let container = new Container({ id: containerId });
         
