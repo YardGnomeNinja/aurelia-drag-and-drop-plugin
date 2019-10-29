@@ -562,16 +562,6 @@ export class DragAndDropController {
      * @param items 
      */
     public registerContainerItems(containerGroupId: string, containerId: string, items: Array<any>) {
-        this.containerGroups[containerGroupId].containers[containerId].items = items;
-    }
-
-    /**
-     * Register a collection of Items with a Container.
-     * @param containerGroupId 
-     * @param containerId 
-     * @param items 
-     */
-    public registerContainerItemsIterator(containerGroupId: string, containerId: string, items: Array<any>) {
         for (let item of items) {
             this.containerGroups[containerGroupId].containers[containerId].items.push(item);
         }
