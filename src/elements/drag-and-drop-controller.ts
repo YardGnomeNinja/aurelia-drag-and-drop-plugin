@@ -566,6 +566,18 @@ export class DragAndDropController {
     }
 
     /**
+     * Register a collection of Items with a Container.
+     * @param containerGroupId 
+     * @param containerId 
+     * @param items 
+     */
+    public registerContainerItemsIterator(containerGroupId: string, containerId: string, items: Array<any>) {
+        for (let item of items) {
+            this.containerGroups[containerGroupId].containers[containerId].items.push(item);
+        }
+    }
+
+    /**
      * Register Event Handlers for a Container Group.
      * @param eventName 
      * @param dragulaInstance 
