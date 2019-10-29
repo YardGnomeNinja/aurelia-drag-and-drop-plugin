@@ -17,16 +17,15 @@
         containerGroup0 - container0
         <ul
             class="container js-drag-and-drop-container"
-            data-option-copy="true"
+            data-option-copy="false"
             data-option-copy-sort-source="false"
             data-option-direction=""
             data-option-ignore-input-text-selection=""
-            data-option-mirror-container=""
-            data-option-remove-on-spill=""
-            data-option-revert-on-spill=""
-            data-option-accepts-check="accepts_check"
-            data-option-invalid-check="invalid_check"
-            data-option-moves-check="moves_check"
+            data-option-remove-on-spill="false"
+            data-option-revert-on-spill="true"
+            data-option-accepts="accepts_check"
+            data-option-invalid="invalid_check"
+            data-option-moves="moves_check"
             data-cancel-handler="cancel_handler0"
             data-cloned-handler="cloned_handler0"
             data-container-group="containerGroup0"
@@ -39,7 +38,11 @@
             data-out-handler="out_handler0"
             style="padding: 10px;"
             id="container0">
-                <li repeat.for="container0Item of dragAndDropController.getContainerItems('containerGroup0','container0')" click.delegate="boop($event.target)" data-model.bind="container0Item" style="border: 1px solid #f00;">
+                <li 
+                    repeat.for="container0Item of dragAndDropController.getContainerItems('containerGroup0','container0')"
+                    click.delegate="get_item_model_from_drag_and_drop_controller_collection($event.target)"
+                    data-model.bind="container0Item"
+                    style="border: 1px solid #f00;">
                     ${container0Item.id} - ${container0Item.propertyY} - ${container0Item.propertyZ}
                 </li>
         </ul>    
@@ -52,7 +55,11 @@
             data-container-group="containerGroup0"
             id="container1"
             style="padding: 10px;">
-                <li repeat.for="container1Item of dragAndDropController.getContainerItems('containerGroup0','container1')" data-model.bind="container1Item" style="border: 1px solid #0f0;">
+                <li 
+                    repeat.for="container1Item of dragAndDropController.getContainerItems('containerGroup0','container1')"
+                    click.delegate="get_item_model_from_drag_and_drop_controller_collection($event.target)"
+                    data-model.bind="container1Item"
+                    style="border: 1px solid #0f0;">
                     ${container1Item.id} - ${container1Item.propertyY} - ${container1Item.propertyZ}
                 </li>
         </ul>
@@ -65,7 +72,11 @@
             data-container-group="containerGroup0"
             id="container2"
             style="padding: 10px;">
-            <li repeat.for="container2Item of dragAndDropController.getContainerItems('containerGroup0','container2')" data-model.bind="container2Item" style="border: 1px solid #00f;">
+            <li
+                repeat.for="container2Item of dragAndDropController.getContainerItems('containerGroup0','container2')" 
+                click.delegate="get_item_model_from_drag_and_drop_controller_collection($event.target)"
+                data-model.bind="container2Item"
+                style="border: 1px solid #00f;">
                 ${container2Item.id} - ${container2Item.propertyY} - ${container2Item.propertyZ}
             </li>
         </ul>
@@ -83,7 +94,10 @@
             data-option-copy-sort-source="true"
             id="container3"
             style="padding: 10px;">
-                <li repeat.for="container3Item of dragAndDropController.getContainerItems('alphaOmega','container3')" data-model.bind="container3Item" style="border: 1px solid #f0f;">
+                <li
+                    repeat.for="container3Item of dragAndDropController.getContainerItems('alphaOmega','container3')"
+                    data-model.bind="container3Item"
+                    style="border: 1px solid #f0f;">
                     ${container3Item}
                 </li>
         </ul>

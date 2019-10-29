@@ -21,9 +21,10 @@ export class App {
 
     bind() {
         // Items can be retrieved during bind. However, note that they must be registered with the DragAndDropController in attached().
-        this.itemsA.push({ id: "1", propertyY: "item1 propY (origin: container0)", propertyZ: 1, methodABC: function(param) { console.log(`${param}`); return param; } });
-        this.itemsA.push({ id: "2", propertyY: "item2 propY (origin: container0)", propertyZ: 2, methodABC: function(param) { console.log(`${param}`); return param; } });
-        this.itemsA.push({ id: "3", propertyY: "item3 propY (origin: container0)", propertyZ: 3, methodABC: function(param) { console.log(`${param}`); return param; } });
+        // NOTE: Currently, Functions ARE NOT serialized
+        this.itemsA.push({ id: "1", propertyY: "item1 propY (origin: container0)", propertyZ: 1, methodABC: function(param) { console.log(`id: ${this.id}, param: ${param}`); return param; } });
+        this.itemsA.push({ id: "2", propertyY: "item2 propY (origin: container0)", propertyZ: 2, methodABC: function(param) { console.log(`id: ${this.id}, param: ${param}`); return param; } });
+        this.itemsA.push({ id: "3", propertyY: "item3 propY (origin: container0)", propertyZ: 3, methodABC: function(param) { console.log(`id: ${this.id}, param: ${param}`); return param; } });
 
         this.itemsB.push({ id: "4", propertyY: "item4 propY (origin: container1)", propertyZ: 4 });
         this.itemsB.push({ id: "5", propertyY: "item5 propY (origin: container1)", propertyZ: 5 });
@@ -39,8 +40,12 @@ export class App {
         // DragAndDropController will register any element on the page that meets the following criteria:
         //      Element's class attribute contains: 'js-drag-and-drop-container'
         //      Element has attribute: data-container-group="<group name>"
+        // The plugin has some kinks that haven't been fully worked out.
+        // It will warn you about known problems unless you silence it by initializing the controller like so: new DragAndDropController(this, true).
+        // Only hide the warnings once you're aware of the potential problems.
+        // If you have some time, it'd be great if you could help solve these bugs. Thanks!
         this.dragAndDropController = new DragAndDropController(this);
-
+        
         // Items must be registered with the DragAndDropController.
         this.dragAndDropController.registerContainerItems("containerGroup0", "container0", this.itemsA);
         this.dragAndDropController.registerContainerItems("containerGroup0", "container1", this.itemsB);
@@ -48,22 +53,45 @@ export class App {
         this.dragAndDropController.registerContainerItems("alphaOmega", "container3", this.itemsD);
     }
 
+    get_item_model_from_drag_and_drop_controller_collection(target: Element) {
+        // Get the Container Group Id from the parent (should never change)
+        let containerGroupId = target.parentElement.getAttribute('data-container-group');
+
+        // Get the current Container Id from the parent (subject to change)
+        let containerId = target.parentElement.getAttribute('id');
+
+        // Get the stringified model
+        let elementDataModel = target.getAttribute('data-model');
+
+        // If the stringified model isn't undefined
+        if (elementDataModel != undefined) {
+            // Parse the model
+            let parsedModel = JSON.parse(elementDataModel);
+
+            // Get the real model from the drag and drop controller collection
+            // let actualModel = this.dragAndDropController.getContainerItem(containerGroupId, containerId, (x) => { return x.id == parsedModel.id;  });
+            let actualModel = this.dragAndDropController.getContainerItemByProperties(containerGroupId, containerId, ["id"], [parsedModel.id]);
+            
+            // Show the model
+            console.log(actualModel);
+
+            // Try out the function on the model if it exists
+            if (actualModel && actualModel['methodABC']) {
+                actualModel.methodABC("test param");
+            }
+        }
+
+        let nonexistantContainerGroupTest = this.dragAndDropController.getContainerItemByFunction("123", containerId, (x) => { return x.id == 1;  })
+        console.log(nonexistantContainerGroupTest);
+
+        let nonexistantContainerTest = this.dragAndDropController.getContainerItemByProperties(containerGroupId, "123", ["id"], [1])
+        console.log(nonexistantContainerTest);
+
+        let nonexistantModelTest = this.dragAndDropController.getContainerItemByFunction(containerGroupId, containerId, (x) => { return x.id == 9999;  })
+        console.log(nonexistantModelTest);
+    }
+
     click_me() {
-        // // What's the DragAndDropController look like?
-        // console.log(this.dragAndDropController)
-
-        // // What's containerGroup0 look like?
-        // console.log(this.dragAndDropController.getContainerGroup('containerGroup0'));
-        // console.log(this.dragAndDropController.containerGroups.containerGroup0)
-        
-        // // What's container0 look like?
-        // console.log(this.dragAndDropController.getContainer('containerGroup0', 'container0'));
-        // console.log(this.dragAndDropController.containerGroups.containerGroup0.containers.container0)
-        
-        // // What items are in container0?
-        // console.log(this.dragAndDropController.getContainerItems('containerGroup0', 'container0'));
-        // console.log(this.dragAndDropController.containerGroups.containerGroup0.containers.container0.items)
-
         console.log('-------------------------------------------------------')
         let containerGroup0Container0Items = this.dragAndDropController.getContainerItems('containerGroup0', 'container0');
         let containerGroup0Container1Items = this.dragAndDropController.getContainerItems('containerGroup0', 'container1');

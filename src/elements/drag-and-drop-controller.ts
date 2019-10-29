@@ -11,13 +11,22 @@ import * as dragula from 'dragula';
 export class DragAndDropController {
     private callingContext;
     public containerGroups: { [id: string]: ContainerGroup } = { };
+    public hideWarnings = false;
 
     /**
      * Create, instantiate, and register elements designated by the 'js-drag-and-drop-container' class into logical groups to allow drag-and-drop functionality within those groups. 
      * @param callingContext A reference to the object containing the handlers that will be executed when an event is fired.
      */
-    constructor(callingContext) {
+    constructor(callingContext, hideWarnings: boolean = false) {
         this.callingContext = callingContext;
+        this.hideWarnings = hideWarnings;
+
+        if (!this.hideWarnings) {
+            console.warn(
+                `WARNING: This plugin is a work in progress and contains a few known bugs and probably many more that are unknown.
+                \nIf you accept the risks involved, you can silence this and other warning messages by setting the controller's 'hideWarnings' property to 'true'.
+                \nPlease THOROUGHLY test the functionality for your implementation. There are a lot of moving parts here and I'm certain some things have been overlooked.`);
+        }
 
         this.registerContainerGroups(this.containerGroups);
     }
@@ -29,31 +38,47 @@ export class DragAndDropController {
         // accepts
         // https://github.com/bevacqua/dragula#optionsaccepts
         //////////////////////
-        // data-option-accepts-check="accepts_check"
-        // (el, target, source, sibling)
-        // return true;
+        let optionAccepts = containerGroupLeaderHTMLElement.getAttribute('data-option-accepts');
+
+        if (optionAccepts != undefined) {
+            let optionAcceptsTrimmed = optionAccepts.trim();
+
+            if (optionAcceptsTrimmed != "") {
+                // If there is a function in the calling context matching the provided name, use it to determine if copy is true.
+                let acceptsFunction = callingContext[optionAcceptsTrimmed];
+
+                if (acceptsFunction) {
+                    containerGroup.accepts = acceptsFunction;
+                    result["accepts"] = acceptsFunction;    
+                }
+            }
+        }
 
         //////////////////////
         // copy
         // Specifies whether or not elements are copied when dropped.
         // https://github.com/bevacqua/dragula#optionscopy
         //////////////////////
-        let optionCopy = containerGroupLeaderHTMLElement.getAttribute('data-option-copy').trim();
+        let optionCopy = containerGroupLeaderHTMLElement.getAttribute('data-option-copy');
 
-        if (optionCopy != undefined && optionCopy != "") {
-            let optionCopyLowercase = optionCopy.toLowerCase();
+        if (optionCopy != undefined) {
+            let optionCopyTrimmed = optionCopy.trim();
 
-            // If the option specifies a boolean.
-            if (optionCopyLowercase == 'true' || optionCopyLowercase == 'false') {
-                containerGroup.copy = optionCopyLowercase == 'true';
-                result["copy"] = optionCopyLowercase == 'true';    
-            } else {
-                // If there is a function in the calling context matching the provided name, use it to determine if copy is true.
-                let copyCheckFunction = callingContext[optionCopy];
+            if (optionCopyTrimmed != "") {
+                let optionCopyLowercase = optionCopyTrimmed.toLowerCase();
 
-                if (copyCheckFunction) {
-                    containerGroup.copy = copyCheckFunction;
-                    result["copy"] = copyCheckFunction;    
+                // If the option specifies a boolean.
+                if (optionCopyLowercase == 'true' || optionCopyLowercase == 'false') {
+                    containerGroup.copy = optionCopyLowercase == 'true';
+                    result["copy"] = optionCopyLowercase == 'true';    
+                } else {
+                    // If there is a function in the calling context matching the provided name, use it to determine if copy is true.
+                    let copyFunction = callingContext[optionCopy];
+
+                    if (copyFunction) {
+                        containerGroup.copy = copyFunction;
+                        result["copy"] = copyFunction;    
+                    }
                 }
             }
         }
@@ -62,82 +87,180 @@ export class DragAndDropController {
         // copySortSource
         // https://github.com/bevacqua/dragula#optionscopysortsource
         //////////////////////
-        let optionCopySortSource = containerGroupLeaderHTMLElement.getAttribute('data-option-copy-sort-source').trim();
+        let optionCopySortSource = containerGroupLeaderHTMLElement.getAttribute('data-option-copy-sort-source');
 
-        if (optionCopySortSource != undefined && optionCopySortSource != "") {
-            let copySortSource = optionCopySortSource.toLowerCase() == 'true';
+        if (optionCopySortSource != undefined) {
+            let optionCopySortSourceTrimmed = optionCopySortSource.trim();
 
-            if (copySortSource) {
-                console.warn(
-                    `WARNING: The drag-and-drop container group \"${containerGroup.id}\" is using \"copySortSource\" functionality which contains a known bug that should be addressed before deploying to production.
-                    \n Follow these steps to reproduce the bug and determine if you are okay with the consequences.
-                    \n    1. Add two or more items to a container. 
-                    \n    2. Begin to drag any item, except the last item, and drop it on itself or immediately above or below it on the \"sort placeholder\". This effectively cancels the drag, however with unintended concequences.
-                    \n    3. Drag any \"lower\" item to the \"sort placeholder\" immediately above the item from step 2.
-                    \nThe console should display the following error \"TypeError: refNode.parentNode is null\" from aurelia-templating.js. The dragged element will also be removed. This is due to the fact that under normal circumstances moving the item model causes Aurelia Templating to create a new element and retain the element moved by Dragula, thus causing duplication of elements. In the event of the bug, Aurelia Templating is unable to create a new element and the dragged element is removed.`
-                );
+            if (optionCopySortSourceTrimmed != "") {
+                let copySortSource = optionCopySortSourceTrimmed.toLowerCase() == 'true';
+
+                if (!this.hideWarnings && copySortSource) {
+                    console.warn(
+                        `WARNING: The drag-and-drop container group \"${containerGroup.id}\" is using \"copySortSource\" option which contains a known bug that should be addressed before deploying to production.
+                        \n Follow these steps to reproduce the bug and determine if you are okay with the consequences.
+                        \n    1. Add two or more items to a container. 
+                        \n    2. Begin to drag any item, except the last item, and drop it on itself or immediately above or below it on the \"sort placeholder\". This effectively cancels the drag, however with unintended concequences.
+                        \n    3. Drag any \"lower\" item to the \"sort placeholder\" immediately above the item from step 2.
+                        \nThe console should display the following error \"TypeError: refNode.parentNode is null\" from aurelia-templating.js. The dragged element will also be removed. This is due to the fact that under normal circumstances moving the item model causes Aurelia Templating to create a new element and retain the element moved by Dragula, thus causing duplication of elements. In the event of the bug, Aurelia Templating is unable to create a new element and the dragged element is removed.`
+                    );
+                }
+
+                containerGroup.copySortSource = copySortSource;
+                result["copySortSource"] = copySortSource;
             }
-
-            containerGroup.copySortSource = copySortSource;
-            result["copySortSource"] = copySortSource;    
         }
 
         //////////////////////
         // direction
         // https://github.com/bevacqua/dragula#optionsdirection
         //////////////////////
-        // data-option-direction=""
+        let optionDirection = containerGroupLeaderHTMLElement.getAttribute('data-option-direction');
+
+        if (optionDirection != undefined) {
+            let optionDirectionTrimmed = optionDirection.trim();
+
+            if (optionDirectionTrimmed != "") {
+                if (optionDirectionTrimmed == 'horizontal' || optionDirectionTrimmed == "vertical") {
+                    containerGroup.direction = optionDirectionTrimmed;
+                    result["direction"] = optionDirectionTrimmed;    
+                }        
+            }
+        }
 
         //////////////////////
         // ignoreInputTextSelection
         // https://github.com/bevacqua/dragula#optionsignoreinputtextselection
         //////////////////////
-        // data-option-ignore-input-text-selection=""
+        let optionIgnoreInputTextSelection = containerGroupLeaderHTMLElement.getAttribute('data-option-ignore-input-text-selection');
+
+        if (optionIgnoreInputTextSelection != undefined) {
+            let optionIgnoreInputTextSelectionTrimmed = optionIgnoreInputTextSelection.trim();
+
+            if (optionIgnoreInputTextSelectionTrimmed == 'true' || optionIgnoreInputTextSelectionTrimmed == "false") {
+                containerGroup.ignoreInputTextSelection = optionIgnoreInputTextSelectionTrimmed.toLowerCase() == 'true';
+                result["ignoreInputTextSelection"] = optionIgnoreInputTextSelectionTrimmed.toLowerCase() == 'true';    
+            }
+        }
 
         //////////////////////
         // invalid
         // https://github.com/bevacqua/dragula#optionsinvalid
         //////////////////////
-        // data-option-invalid-check="invalid_check"
-        // (el, handle)
-        // return false;
+        let optionInvalid = containerGroupLeaderHTMLElement.getAttribute('data-option-invalid');
+
+        if (optionInvalid != undefined) {
+            let optionInvalidTrimmed = optionInvalid.trim();
+
+            if (optionInvalidTrimmed != "") {
+                // If there is a function in the calling context matching the provided name, use it to determine if copy is true.
+                let invalidFunction = callingContext[optionInvalidTrimmed];
+
+                if (invalidFunction) {
+                    containerGroup.invalid = invalidFunction;
+                    result["invalid"] = invalidFunction;    
+                }
+            }
+        }
 
         //////////////////////
         // isContainer
         // https://github.com/bevacqua/dragula#optionsiscontainer
         //////////////////////
-        // data-option-is-container-check="isContainer_check"
-        // (el)
-        // return false;
+        let optionIsContainer = containerGroupLeaderHTMLElement.getAttribute('data-option-is-container');
 
+        if (optionIsContainer != undefined) {
+            let optionIsContainerTrimmed = optionIsContainer.trim();
+
+            if (optionIsContainerTrimmed != "") {
+                // If there is a function in the calling context matching the provided name, use it to determine if copy is true.
+                let isContainerFunction = callingContext[optionIsContainerTrimmed];
+
+                if (isContainerFunction) {
+                    containerGroup.isContainer = isContainerFunction;
+                    result["isContainer"] = isContainerFunction;    
+                }
+            }
+        }
+        
         //////////////////////
         // mirrorContainer
         // https://github.com/bevacqua/dragula#optionsmirrorcontainer
         //////////////////////
-        // data-option-mirror-container=""
+        let optionMirrorContainer = containerGroupLeaderHTMLElement.getAttribute('data-option-mirror-container');
+
+        if (optionMirrorContainer != undefined) {
+            let optionMirrorContainerTrimmed = optionMirrorContainer.trim();
+
+            if (!this.hideWarnings && optionMirrorContainerTrimmed != "") {
+                console.warn(`WARNING: The drag-and-drop container group \"${containerGroup.id}\" is attempting to use \"mirrorContainer\" option which is currently not implemented via the plugin. To use this feature, configure it manually via the Dragula object on the container group object.`);
+            }
+        }
 
         //////////////////////
         // moves
         // https://github.com/bevacqua/dragula#optionsmoves
         //////////////////////
-        // data-option-moves-check="moves_check"
-        // (el, source, handle, sibling)
-        // return true;
+        let optionMoves = containerGroupLeaderHTMLElement.getAttribute('data-option-moves');
+
+        if (optionMoves != undefined) {
+            let optionMovesTrimmed = optionMoves.trim();
+
+            if (optionMovesTrimmed != "") {
+                // If there is a function in the calling context matching the provided name, use it to determine if copy is true.
+                let movesFunction = callingContext[optionMovesTrimmed];
+
+                if (movesFunction) {
+                    containerGroup.moves = movesFunction;
+                    result["moves"] = movesFunction;
+                }
+            }
+        }
 
         //////////////////////
         // removeOnSpill
         // https://github.com/bevacqua/dragula#optionsremoveonspill
         //////////////////////
-        // data-option-remove-on-spill=""
+        let optionRemoveOnSpill = containerGroupLeaderHTMLElement.getAttribute('data-option-remove-on-spill');
+
+        if (optionRemoveOnSpill != undefined) {
+            let optionRemoveOnSpillTrimmed = optionRemoveOnSpill.trim();
+
+            if (optionRemoveOnSpillTrimmed == 'true' || optionRemoveOnSpillTrimmed == "false") {
+                if (!this.hideWarnings && optionRemoveOnSpillTrimmed.toLowerCase() == 'true' && (result["copy"] != undefined && result["copy"] != "" && result["copy"] == true)) {
+                    console.warn(`WARNING: The drag-and-drop container group \"${containerGroup.id}\" is attempting to use \"copy\" and \"remove-on-spill\" options together. \"remove-on-spill\" is ignored when using \"copy\".`);
+                } else {
+                    if (!this.hideWarnings && optionRemoveOnSpillTrimmed.toLowerCase() == 'true') {
+                        console.warn(
+                            `WARNING: The drag-and-drop container group \"${containerGroup.id}\" is using \"removeOnSpill\" option which contains a known bug that should be addressed before deploying to production.
+                            \n Follow these steps to reproduce the bug and determine if you are okay with the consequences.
+                            \n    1. Create two containers within the same group. 
+                            \n    2. Add multiple items to each container.
+                            \n    3. Drag an item from the "second" container "across" the "first/topmost" container and pass beyond the container then release.
+                            \nThe item you dragged will be removed ALONG WITH the bottom item from the "first/topmost" container. However, if you check the item collections within the drag and drop controller, you will see that the model for the item you dragged remains but the model for the item that was incorrectly removed was also removed.`
+                        );
+                    }
+                }
+
+                containerGroup.removeOnSpill = optionRemoveOnSpillTrimmed.toLowerCase() == 'true';
+                result["removeOnSpill"] = optionRemoveOnSpillTrimmed.toLowerCase() == 'true';    
+            }
+        }
 
         //////////////////////
         // revertOnSpill
         // https://github.com/bevacqua/dragula#optionsrevertonspill
         //////////////////////
-        // data-option-revert-on-spill=""
+        let optionRevertOnSpill = containerGroupLeaderHTMLElement.getAttribute('data-option-revert-on-spill');
 
-        // console.log(callingContext);
-        // console.log(containerGroupLeaderHTMLElement);
+        if (optionRevertOnSpill != undefined) {
+            let optionRevertOnSpillTrimmed = optionRevertOnSpill.trim();
+
+            if (optionRevertOnSpillTrimmed == 'true' || optionRevertOnSpillTrimmed == "false") {
+                containerGroup.revertOnSpill = optionRevertOnSpillTrimmed.toLowerCase() == 'true';
+                result["revertOnSpill"] = optionRevertOnSpillTrimmed.toLowerCase() == 'true';    
+            }
+        }
 
         return result;
     }
@@ -210,6 +333,55 @@ export class DragAndDropController {
      */
     public getContainerGroup(containerGroupId: string) {
         return this.containerGroups[containerGroupId];
+    }
+
+    /**
+     * Get an item in the Container by providing the specific function to execute for the find.
+     * @param containerGroupId The container group identifier.
+     * @param containerId The container identifier.
+     * @param findFunction The function used to determine if a match is found. e.g. (x) => { return x.id == localObject.id; }
+     */
+    public getContainerItemByFunction(containerGroupId: string, containerId: string, findFunction: Function) {
+        let containerGroup = this.containerGroups[containerGroupId];
+
+        if (containerGroup) {
+            let container = containerGroup.containers[containerId];
+
+            if (container) {
+                return container.items.find((x) => findFunction(x));
+            }
+        }
+
+        return undefined; 
+    }
+
+    /**
+     * Get an item in the Container by passing in a list of properties and values to match against (bound to be slow for large collections).
+     * @param containerGroupId The container group identifier.
+     * @param containerId The container identifier.
+     * @param propertyNames A list of property name strings to check the values against to ensure a match. e.g. ['id','name']
+     * @param propertyValues A list of values that will be used to ensure a matching item is found. e.g. [1,'item 1']
+     */
+    public getContainerItemByProperties(containerGroupId: string, containerId: string, propertyNames: Array<string>, propertyValues: Array<any>) {
+        let containerGroup = this.containerGroups[containerGroupId];
+
+        if (containerGroup) {
+            let container = containerGroup.containers[containerId];
+
+            if (container) {
+                return container.items.find((x) => {
+                    let result = true;
+
+                    for (let i = 0; i < propertyNames.length; i++) {
+                        result = result && x[propertyNames[i]] == propertyValues[i];
+                    }
+
+                    return result;
+                });
+            }
+        }
+
+        return undefined; 
     }
 
     /**
@@ -421,6 +593,24 @@ export class DragAndDropController {
         dragulaInstance.on('over', this.overHandler.bind(this, this.callingContext, this.containerGroups, userDefinedOverHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
         dragulaInstance.on('remove', this.removeHandler.bind(this, this.callingContext, this.containerGroups, userDefinedRemoveHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
         dragulaInstance.on('shadow', this.shadowHandler.bind(this, this.callingContext, this.containerGroups, userDefinedShadowHandlerName, dragulaInstance, containerGroupLeaderHTMLElement));
+    }
+
+    private removeContainerItem(containerGroups, sourceContainerHTMLElement: Element, eventItemHTMLElement: Element) {
+        // Get source container info
+        let sourceContainerGroupId = sourceContainerHTMLElement.getAttribute('data-container-group');
+        let sourceContainerId = sourceContainerHTMLElement.id;
+
+        // Get event item info
+        let eventItemDataModel = eventItemHTMLElement.getAttribute('data-model');
+        let eventItemModel = this.getItem(containerGroups, sourceContainerGroupId, sourceContainerId, eventItemDataModel);
+
+        // Get event item index
+        let eventItemModelIndex = this.getItemIndex(containerGroups, sourceContainerGroupId, sourceContainerId, eventItemModel);
+
+        // Remove item from original container
+        console.log(`removing ${sourceContainerGroupId} - ${sourceContainerId} - ${eventItemModelIndex}`)
+
+        containerGroups[sourceContainerGroupId].containers[sourceContainerId].items.splice(eventItemModelIndex, 1)[0];
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -713,6 +903,9 @@ export class DragAndDropController {
         }
         /////////////////////////////
         /////////////////////////////
+
+        console.log(containerGroups, eventSourceContainerHTMLElement, eventItemHTMLElement)
+        this.removeContainerItem(containerGroups, eventSourceContainerHTMLElement, eventItemHTMLElement);
 
         // console.log(`happens after ${userDefinedHandlerName} for remove`)
     }
