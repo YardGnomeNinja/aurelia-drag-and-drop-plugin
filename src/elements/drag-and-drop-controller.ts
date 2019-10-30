@@ -639,7 +639,7 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName];
+        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
@@ -671,7 +671,7 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName];
+        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
@@ -702,7 +702,7 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName];
+        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
@@ -733,7 +733,7 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName];
+        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
@@ -767,7 +767,7 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName];
+        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
 
         // Execute userDefinedHandler if it exists
 
@@ -833,7 +833,7 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName];
+        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
@@ -865,7 +865,7 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName];
+        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
@@ -897,7 +897,7 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName];
+        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
@@ -932,7 +932,7 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName];
+        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
