@@ -173,7 +173,6 @@ export class App {
     }
 
     drop_handler0(el: Element, target, source, sibling) {
-        console.log(this.itemsA)
         // console.log(`-- drop_handler0(el, target, source, sibling) --`);
         // console.log(el);
         // console.log(target);

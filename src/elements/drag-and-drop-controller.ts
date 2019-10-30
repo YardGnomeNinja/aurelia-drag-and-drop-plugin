@@ -639,11 +639,13 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
+        let userDefinedHandler = callingContext[userDefinedHandlerName];
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
-            userDefinedHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
+            let boundHandler = userDefinedHandler.bind(callingContext);
+
+            boundHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
         }
         /////////////////////////////
         /////////////////////////////
@@ -671,11 +673,13 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
+        let userDefinedHandler = callingContext[userDefinedHandlerName];
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
-            userDefinedHandler(eventItemClone, eventItemOriginal, eventItemType);
+            let boundHandler = userDefinedHandler.bind(callingContext);
+
+            boundHandler(eventItemClone, eventItemOriginal, eventItemType);
         }
         /////////////////////////////
         /////////////////////////////
@@ -702,11 +706,13 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
+        let userDefinedHandler = callingContext[userDefinedHandlerName];
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
-            userDefinedHandler(eventItemHTMLElement, eventSource);
+            let boundHandler = userDefinedHandler.bind(callingContext);
+
+            boundHandler(eventItemHTMLElement, eventSource);
         }
         /////////////////////////////
         /////////////////////////////
@@ -733,11 +739,14 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
+        let userDefinedHandler = callingContext[userDefinedHandlerName];
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
-            userDefinedHandler(eventItemHTMLElement);
+            console.log(`calling ${userDefinedHandlerName}`)
+            let boundHandler = userDefinedHandler.bind(callingContext);
+
+            boundHandler(eventItemHTMLElement);
         }
         /////////////////////////////
         /////////////////////////////
@@ -767,12 +776,14 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
+        let userDefinedHandler = callingContext[userDefinedHandlerName];
 
         // Execute userDefinedHandler if it exists
 
         if (userDefinedHandler) {
-            userDefinedHandler(eventItemHTMLElement, eventTargetContainerHTMLElement, eventSourceContainerHTMLElement, eventNextSiblingItemHTMLElement);
+            let boundHandler = userDefinedHandler.bind(callingContext);
+
+            boundHandler(eventItemHTMLElement, eventTargetContainerHTMLElement, eventSourceContainerHTMLElement, eventNextSiblingItemHTMLElement);
         }
         /////////////////////////////
         /////////////////////////////
@@ -833,11 +844,13 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
+        let userDefinedHandler = callingContext[userDefinedHandlerName];
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
-            userDefinedHandler(eventItemHTMLElement, eventCurrentlyOverContainerHTMLElement, eventSourceContainerHTMLElement);
+            let boundHandler = userDefinedHandler.bind(callingContext);
+
+            boundHandler(eventItemHTMLElement, eventCurrentlyOverContainerHTMLElement, eventSourceContainerHTMLElement);
         }
         /////////////////////////////
         /////////////////////////////
@@ -865,11 +878,13 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
+        let userDefinedHandler = callingContext[userDefinedHandlerName];
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
-            userDefinedHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
+            let boundHandler = userDefinedHandler.bind(callingContext);
+            
+            boundHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
         }
         /////////////////////////////
         /////////////////////////////
@@ -897,11 +912,13 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
+        let userDefinedHandler = callingContext[userDefinedHandlerName];
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
-            userDefinedHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
+            let boundHandler = userDefinedHandler.bind(callingContext);
+            
+            boundHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
         }
         /////////////////////////////
         /////////////////////////////
@@ -932,11 +949,13 @@ export class DragAndDropController {
         /////////////////////////////
         // User Defined Handler
         /////////////////////////////
-        let userDefinedHandler = callingContext[userDefinedHandlerName].bind(callingContext);
+        let userDefinedHandler = callingContext[userDefinedHandlerName];
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
-            userDefinedHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
+            let boundHandler = userDefinedHandler.bind(callingContext);
+            
+            boundHandler(eventItemHTMLElement, eventSourceContainerHTMLElement, eventSource);
         }
         /////////////////////////////
         /////////////////////////////
