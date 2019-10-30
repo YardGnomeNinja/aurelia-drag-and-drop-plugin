@@ -743,7 +743,6 @@ export class DragAndDropController {
 
         // Execute userDefinedHandler if it exists
         if (userDefinedHandler) {
-            console.log(`calling ${userDefinedHandlerName}`)
             let boundHandler = userDefinedHandler.bind(callingContext);
 
             boundHandler(eventItemHTMLElement);
